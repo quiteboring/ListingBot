@@ -1,14 +1,14 @@
 {
-  "name": "feblist",
+  "name": "listingbot",
   "version": "1.0.0",
   "description": "All-in-one tool to run your Skyblock Shop on Discord.",
-  "homepage": "https://github.com/quiteboring/FebList#readme",
+  "homepage": "https://github.com/quiteboring/ListingBot#readme",
   "bugs": {
-    "url": "https://github.com/quiteboring/FebList/issues"
+    "url": "https://github.com/quiteboring/ListingBot/issues"
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/quiteboring/FebList.git"
+    "url": "git+https://github.com/quiteboring/ListingBot.git"
   },
   "license": "ISC",
   "author": "QuiteBoring",
