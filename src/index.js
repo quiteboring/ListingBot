@@ -1,0 +1,6 @@
+import "dotenv/config";
+import { Bot } from "./bot/client.js";
+
+(async () => {
+  await new Bot(process.env.DISCORD_BOT_TOKEN).start();
+})();

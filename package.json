@@ -1,0 +1,24 @@
+{
+  "name": "feblist",
+  "version": "1.0.0",
+  "description": "All-in-one tool to run your Skyblock Shop on Discord.",
+  "homepage": "https://github.com/quiteboring/FebList#readme",
+  "bugs": {
+    "url": "https://github.com/quiteboring/FebList/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/quiteboring/FebList.git"
+  },
+  "license": "ISC",
+  "author": "QuiteBoring",
+  "type": "module",
+  "main": "src/index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1"
+  },
+  "dependencies": {
+    "discord.js": "^14.22.1",
+    "dotenv": "^17.2.2"
+  }
+}
