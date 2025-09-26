@@ -1,9 +1,10 @@
 const colors = {
   reset: '\x1b[0m',
-  red: '\x1b[31m',
-  green: '\x1b[32m',
-  yellow: '\x1b[33m',
-  blue: '\x1b[34m',
+  bold: '\x1b[1m',
+  red: '\x1b[38;5;52m',
+  green: '\x1b[38;5;22m',
+  yellow: '\x1b[38;5;58m',
+  blue: '\x1b[38;5;18m',
 };
 
 const getTimestamp = () => {
@@ -13,7 +14,7 @@ const getTimestamp = () => {
 
 const log = (level, message, color) => {
   console.log(
-    `[${getTimestamp()}] ${color}[${level.toUpperCase()}]${colors.reset} - ${message}`,
+    `${color}${colors.bold}[${getTimestamp()}] [${level.toUpperCase()}] - ${message}${colors.reset}`,
   );
 };
 

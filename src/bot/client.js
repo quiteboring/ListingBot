@@ -9,13 +9,15 @@ import { fileURLToPath } from 'url';
 import { logger } from '../utils/logger.js';
 import fs from 'fs';
 import path from 'path';
+import { MongoClient } from 'mongodb';
 
 export default class Bot extends Client {
   /**
    * @param {string} token
    * @param {string} clientId
+   * @param {string} databaseUrl
    */
-  constructor(token, clientId) {
+  constructor(token, clientId, databaseUrl) {
     super({
       intents: [
         GatewayIntentBits.Guilds,
@@ -26,8 +28,10 @@ export default class Bot extends Client {
 
     this.token = token;
     this.clientId = clientId;
-    this.rest = new REST().setToken(this.token);
+
+    this.db = new MongoClient(databaseUrl);
     this.commands = new Collection();
+    this.rest = new REST().setToken(this.token);
   }
 
   async loadCommands() {
