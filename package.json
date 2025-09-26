@@ -15,10 +15,14 @@
   "type": "module",
   "main": "src/index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "format": "prettier --write \"src/**/*.js\""
   },
   "dependencies": {
     "discord.js": "^14.22.1",
     "dotenv": "^17.2.2"
+  },
+  "devDependencies": {
+    "prettier": "^3.6.2"
   }
 }
