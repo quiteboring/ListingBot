@@ -1,8 +1,13 @@
-import { PermissionFlagsBits, SlashCommandBuilder } from 'discord.js';
+import {
+  MessageFlags,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+} from 'discord.js';
 import { sendExchangeEmbed } from '../utils/exchange.js';
 import { sendCoinsEmbed } from '../utils/coins.js';
 import { saveTicketsCategory } from '../utils/ticket.js';
 import { uploadEmojis } from '../utils/emojis.js';
+import { successEmbed } from '../utils/embed.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -24,6 +29,17 @@ export default {
           input
             .setName('channel')
             .setDescription('The channel of where to send embed.')
+            .setRequired(true),
+        ),
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('seller')
+        .setDescription('Set the seller role.')
+        .addRoleOption((input) =>
+          input
+            .setName('role')
+            .setDescription("The seller's role.")
             .setRequired(true),
         ),
     )
@@ -69,6 +85,18 @@ export default {
         break;
       case 'tickets':
         await saveTicketsCategory(client, interaction);
+        break;
+      case 'seller':
+        const role = interaction.options.getRole('seller');
+        await client.db.set('seller', role.id);
+        await interaction.reply({
+          embeds: [
+            successEmbed(
+              `Succesfully set seller role to id: ${role.id}`,
+            ),
+          ],
+          flags: MessageFlags.Ephemeral,
+        });
         break;
     }
   },

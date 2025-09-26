@@ -5,9 +5,16 @@ import {
   TextInputStyle,
 } from 'discord.js';
 
-export const createModal = async (client, interaction, title, inputs) => {
+export const createModal = async (
+  client,
+  interaction,
+  title,
+  inputs,
+) => {
   const { customId } = interaction;
-  const modal = new ModalBuilder().setCustomId(customId).setTitle(title);
+  const modal = new ModalBuilder()
+    .setCustomId(customId)
+    .setTitle(title);
 
   const components = inputs.map((input) => {
     return new ActionRowBuilder().addComponents(
@@ -23,4 +30,3 @@ export const createModal = async (client, interaction, title, inputs) => {
 
   await interaction.showModal(modal);
 };
-

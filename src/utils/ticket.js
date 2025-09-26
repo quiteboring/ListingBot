@@ -41,26 +41,47 @@ export const createTicketChannel = async (
   try {
     const ticketsCategoryId = await client.db.get('tickets_category');
     let index = await client.db.get('ticket_count');
+    let role = await client.db.get('seller_role');
     if (!index) index = 1;
+
+    const perms = [
+      {
+        id: interaction.guild.id,
+        deny: [PermissionsBitField.Flags.ViewChannel],
+      },
+      {
+        id: interaction.user.id,
+        allow: [
+          PermissionsBitField.Flags.ViewChannel,
+          PermissionsBitField.Flags.SendMessages,
+          PermissionsBitField.Flags.ReadMessageHistory,
+        ],
+      },
+      {
+        id: interaction.user.id,
+        allow: [
+          PermissionsBitField.Flags.ViewChannel,
+          PermissionsBitField.Flags.SendMessages,
+          PermissionsBitField.Flags.ReadMessageHistory,
+        ],
+      },
+    ];
+
+    if (role)
+      perms.push({
+        id: role,
+        allow: [
+          PermissionsBitField.Flags.ViewChannel,
+          PermissionsBitField.Flags.SendMessages,
+          PermissionsBitField.Flags.ReadMessageHistory,
+        ],
+      });
 
     const channel = await interaction.guild.channels.create({
       name: `ticket-${index}`,
       type: ChannelType.GuildText,
       parent: ticketsCategoryId,
-      permissionOverwrites: [
-        {
-          id: interaction.guild.id,
-          deny: [PermissionsBitField.Flags.ViewChannel],
-        },
-        {
-          id: interaction.user.id,
-          allow: [
-            PermissionsBitField.Flags.ViewChannel,
-            PermissionsBitField.Flags.SendMessages,
-            PermissionsBitField.Flags.ReadMessageHistory,
-          ],
-        },
-      ],
+      permissionOverwrites: perms,
     });
 
     await client.db.set('ticket_count', index + 1);
