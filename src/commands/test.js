@@ -3,8 +3,8 @@ import { mainEmbed } from '../utils/embed.js';
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('ping')
-    .setDescription('Pong!'),
+    .setName('test')
+    .setDescription('Bunch of testing commands!'),
 
   /**
    * @param {import('../bot/client.js').default} client

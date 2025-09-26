@@ -1,12 +1,11 @@
 import { MessageFlags } from 'discord.js';
-import { logger } from '../utils/logger.js';
 
 export default {
   name: 'interactionCreate',
 
   /**
    * @param {import("../bot/client").default} client
-   * @param {import("discord.js").Interaction} interaction
+   * @param {import("discord.js").ChatInputCommandInteraction} interaction
    */
   async execute(client, interaction) {
     if (!interaction.isCommand()) return;
@@ -17,13 +16,18 @@ export default {
     try {
       await command.execute(client, interaction);
     } catch (error) {
-      logger.error(
-        `Command: ${interaction.commandName} failed: ${error}`,
-      );
-      await interaction.reply({
+      const content = {
         content: 'i errored :/',
         flags: MessageFlags.Ephemeral,
-      });
+      };
+
+      console.log(error);
+
+      if (interaction.deferred) {
+        await interaction.editReply(content);
+      } else {
+        await interaction.reply(content);
+      }
     }
   },
 };

@@ -9,7 +9,7 @@ import { fileURLToPath } from 'url';
 import { logger } from '../utils/logger.js';
 import fs from 'fs';
 import path from 'path';
-import { MongoClient } from 'mongodb';
+import { QuickDB } from 'quick.db';
 
 export default class Bot extends Client {
   /**
@@ -29,7 +29,8 @@ export default class Bot extends Client {
     this.token = token;
     this.clientId = clientId;
 
-    this.db = new MongoClient(databaseUrl);
+    this.db = new QuickDB({ filePath: 'database.sqlite' });
+
     this.commands = new Collection();
     this.rest = new REST().setToken(this.token);
   }
