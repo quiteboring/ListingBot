@@ -6,7 +6,7 @@ export default {
 
   /**
    * @param {import("../bot/client").default} client
-   * @param {import("discord.js").ChatInputCommandInteraction} interaction
+   * @param {import("discord.js").Interaction} interaction
    */
   async execute(client, interaction) {
     if (!interaction.isCommand()) return;

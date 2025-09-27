@@ -1,13 +1,22 @@
 import {
+  ActionRowBuilder,
+  ChannelSelectMenuBuilder,
+  ChannelType,
+  EmbedBuilder,
   MessageFlags,
   PermissionFlagsBits,
   SlashCommandBuilder,
 } from 'discord.js';
-import { sendExchangeEmbed } from '../utils/exchange.js';
-import { sendCoinsEmbed } from '../utils/coins.js';
-import { saveTicketsCategory } from '../utils/ticket.js';
-import { uploadEmojis } from '../utils/emojis.js';
-import { successEmbed } from '../utils/embed.js';
+import {
+  errorEmbed,
+  successEmbed,
+  infoEmbed,
+} from '../utils/embed.js';
+import { fileURLToPath } from 'url';
+import { logger } from '../utils/logger.js';
+import config from '../config.js';
+import path from 'path';
+import fs from 'fs/promises';
 
 export default {
   data: new SlashCommandBuilder()
@@ -17,64 +26,12 @@ export default {
     .addSubcommand((sub) =>
       sub
         .setName('emojis')
-        .setDescription(
-          'Upload a list of emojis to a server! (typically separate from your main server)',
-        ),
+        .setDescription('Upload emojis from assets to the server'),
     )
     .addSubcommand((sub) =>
       sub
-        .setName('exchange')
-        .setDescription('Send exchange embed in a specific channel')
-        .addChannelOption((input) =>
-          input
-            .setName('channel')
-            .setDescription('The channel of where to send embed.')
-            .setRequired(true),
-        ),
-    )
-    .addSubcommand((sub) =>
-      sub
-        .setName('seller')
-        .setDescription('Set the seller role.')
-        .addRoleOption((input) =>
-          input
-            .setName('role')
-            .setDescription("The seller's role.")
-            .setRequired(true),
-        ),
-    )
-    .addSubcommand((sub) =>
-      sub
-        .setName('coins')
-        .setDescription('Send coins embed in a specific channel.')
-        .addChannelOption((input) =>
-          input
-            .setName('channel')
-            .setDescription('The channel of where to send embed.')
-            .setRequired(true),
-        ),
-    )
-    .addSubcommand((sub) =>
-      sub
-        .setName('accounts')
-        .setDescription('Set the category for listing accounts.')
-        .addChannelOption((input) =>
-          input
-            .setName('category')
-            .setDescription('The category to list accounts in.')
-            .setRequired(true),
-        ),
-    )
-    .addSubcommand((sub) =>
-      sub
-        .setName('tickets')
-        .setDescription('Set the category for tickets.')
-        .addChannelOption((input) =>
-          input
-            .setName('category')
-            .setDescription('The category to create tickets in.')
-            .setRequired(true),
-        ),
+        .setName('wizard')
+        .setDescription('User friendly setup for your server!'),
     ),
 
   /**
@@ -82,37 +39,92 @@ export default {
    * @param {import('discord.js').ChatInputCommandInteraction} interaction
    */
   async execute(client, interaction) {
-    const subcommand = interaction.options.getSubcommand();
+    const sub = interaction.options.getSubcommand();
+    if (sub === 'emojis')
+      return this.handleEmojis(client, interaction);
+    if (sub === 'wizard')
+      return this.handleWizard(client, interaction);
+  },
 
-    switch (subcommand) {
-      case 'emojis':
-        await uploadEmojis(client, interaction);
-        break;
-      case 'coins':
-        await sendCoinsEmbed(interaction);
-        break;
-      case 'exchange':
-        await sendExchangeEmbed(interaction);
-        break;
-      case 'tickets':
-        await saveTicketsCategory(client, interaction);
-        break;
-      case 'accounts':
-        await saveTicketsCategory(client, interaction);
-        break;
-      case 'seller':
-        const role = interaction.options.getRole('seller');
-        await client.db.set('seller_role', role.id);
-        await interaction.reply({
-          embeds: [
-            successEmbed(
-              `Succesfully set seller role to id: ${role.id}`,
-            ),
-          ],
-          flags: MessageFlags.Ephemeral,
+  async handleEmojis(client, interaction) {
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+    try {
+      const __dirname = path.dirname(fileURLToPath(import.meta.url));
+      const assetsPath = path.resolve(__dirname, '../../assets');
+      const files = (await fs.readdir(assetsPath)).filter((f) =>
+        f.endsWith('.png'),
+      );
+
+      if (!files.length) {
+        return interaction.editReply({
+          embeds: [errorEmbed('No images to upload.')],
         });
+      }
 
-        break;
+      await interaction.editReply({
+        embeds: [infoEmbed(`Processing ${files.length} images...`)],
+      });
+
+      let created = 0,
+        updated = 0;
+      for (const file of files) {
+        const emojiName = path.basename(file, '.png');
+        const filePath = path.join(assetsPath, file);
+        const existing = interaction.guild.emojis.cache.find(
+          (e) => e.name === emojiName,
+        );
+
+        if (existing) {
+          await client.db.set(existing.name, existing.toString());
+          updated++;
+        } else {
+          const emoji = await interaction.guild.emojis.create({
+            attachment: filePath,
+            name: emojiName,
+          });
+          await client.db.set(emoji.name, emoji.toString());
+          created++;
+          await new Promise((r) => setTimeout(r, 1000));
+        }
+      }
+
+      return interaction.editReply({
+        embeds: [
+          successEmbed(
+            `Sync complete! Created: ${created}, Updated: ${updated}.`,
+          ),
+        ],
+      });
+    } catch (err) {
+      logger.error(err);
+      return interaction.editReply({
+        embeds: [errorEmbed('No permissions to upload.')],
+      });
     }
+  },
+
+  async handleWizard(client, interaction) {
+    const key = `setup_${interaction.guild.id}`;
+    await client.db.set(key, { creatorId: interaction.user.id });
+
+    const embed = new EmbedBuilder()
+      .setTitle('Step 1/3 Select the ticket category')
+      .setDescription(
+        'The selected category is where tickets will be created.\n\nUse the dropdown to select a category.\n\n_Not seeing it? Try searching in the dropdown._',
+      )
+      .setColor(config.mainColor);
+
+    const selector = new ActionRowBuilder().addComponents(
+      new ChannelSelectMenuBuilder()
+        .setCustomId('setup_ticket_category')
+        .setPlaceholder('Select a category')
+        .setChannelTypes(ChannelType.GuildCategory),
+    );
+
+    return interaction.reply({
+      embeds: [embed],
+      components: [selector],
+    });
   },
 };

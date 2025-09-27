@@ -1,3 +1,5 @@
+import { PermissionsBitField } from 'discord.js';
+
 export const hasSellerRole = async (client, interaction) => {
   const sellerRoleId = await client.db.get('seller_role');
 
@@ -5,7 +7,7 @@ export const hasSellerRole = async (client, interaction) => {
     return false;
   }
 
-  return interaction.member.roles.cache.has(sellerRoleId);
+  return await interaction.member.roles.cache.has(sellerRoleId);
 };
 
 export const hasAdmin = async (interaction) => {
