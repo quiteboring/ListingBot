@@ -78,6 +78,10 @@ export const handleDetailsSubmission = async (
           .setCustomId('remove_panel_button')
           .setStyle(ButtonStyle.Danger)
           .setLabel('Remove Button'),
+        new ButtonBuilder()
+          .setCustomId('next_step')
+          .setStyle(ButtonStyle.Secondary)
+          .setLabel('Next Step'),
       ),
     ],
   });

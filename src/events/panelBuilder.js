@@ -2,6 +2,11 @@ import {
   handleDetailsSubmission,
   sendDetailsModal,
 } from '../utils/panel/panelDetails.js';
+import {
+  sendAddButtonModal,
+  handleAddButtonSubmission,
+  handleRemoveButton,
+} from '../utils/panel/panelButtons.js';
 
 export default {
   name: 'interactionCreate',
@@ -12,21 +17,14 @@ export default {
    */
   async execute(client, interaction) {
     try {
-      const msg = interaction.message;
-
       if (interaction.isButton()) {
         switch (interaction.customId) {
           case 'set_panel_details':
-            await sendDetailsModal(client, interaction);
-            break;
-          case 'add_button':
-            break;
-          case 'remove_button':
-            break;
-          case 'add_question':
-            break;
-          case 'remove_question':
-            break;
+            return await sendDetailsModal(client, interaction);
+          case 'add_panel_button':
+            return await sendAddButtonModal(client, interaction);
+          case 'remove_panel_button':
+            return await handleRemoveButton(client, interaction);
           case 'next_step':
             break;
           default:
@@ -35,28 +33,21 @@ export default {
       }
 
       if (interaction.isModalSubmit()) {
+        if (
+          interaction.customId.startsWith('add_panel_button_modal_')
+        ) {
+          return await handleAddButtonSubmission(client, interaction);
+        }
+
         switch (interaction.customId) {
           case 'set_panel_details':
-            await handleDetailsSubmission(client, interaction);
-            break;
-          case 'add_button':
-            break;
-          case 'remove_button':
-            break;
-          case 'add_question':
-            break;
-          case 'remove_question':
-            break;
+            return await handleDetailsSubmission(client, interaction);
           default:
             return;
         }
       }
-    } catch (err) {}
+    } catch (err) {
+      console.error('Error during interaction handling:', err);
+    }
   },
 };
-
-/**
- * Goes from settin panel name to then setting panel description
- * Setting panel buttons by clicking (add button) (remove button)
- * Setting modal for each button
- */
