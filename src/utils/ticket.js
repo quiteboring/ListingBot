@@ -1,5 +1,8 @@
 import { errorEmbed, successEmbed } from './embed.js';
 import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
   CategoryChannel,
   ChannelType,
   EmbedBuilder,
@@ -44,44 +47,36 @@ export const createTicketChannel = async (
     let role = await client.db.get('seller_role');
     if (!index) index = 1;
 
-    const perms = [
-      {
-        id: interaction.guild.id,
-        deny: [PermissionsBitField.Flags.ViewChannel],
-      },
-      {
-        id: interaction.user.id,
-        allow: [
-          PermissionsBitField.Flags.ViewChannel,
-          PermissionsBitField.Flags.SendMessages,
-          PermissionsBitField.Flags.ReadMessageHistory,
-        ],
-      },
-      {
-        id: interaction.user.id,
-        allow: [
-          PermissionsBitField.Flags.ViewChannel,
-          PermissionsBitField.Flags.SendMessages,
-          PermissionsBitField.Flags.ReadMessageHistory,
-        ],
-      },
-    ];
-
-    if (role)
-      perms.push({
-        id: role,
-        allow: [
-          PermissionsBitField.Flags.ViewChannel,
-          PermissionsBitField.Flags.SendMessages,
-          PermissionsBitField.Flags.ReadMessageHistory,
-        ],
-      });
-
     const channel = await interaction.guild.channels.create({
       name: `ticket-${index}`,
       type: ChannelType.GuildText,
       parent: ticketsCategoryId,
-      permissionOverwrites: perms,
+      permissionOverwrites: [
+        {
+          id: interaction.guild.id,
+          deny: [PermissionsBitField.Flags.ViewChannel],
+        },
+        {
+          id: interaction.user.id,
+          allow: [
+            PermissionsBitField.Flags.ViewChannel,
+            PermissionsBitField.Flags.SendMessages,
+            PermissionsBitField.Flags.ReadMessageHistory,
+          ],
+        },
+        ...(role
+          ? [
+              {
+                id: role,
+                allow: [
+                  PermissionsBitField.Flags.ViewChannel,
+                  PermissionsBitField.Flags.SendMessages,
+                  PermissionsBitField.Flags.ReadMessageHistory,
+                ],
+              },
+            ]
+          : []),
+      ],
     });
 
     await client.db.set('ticket_count', index + 1);
@@ -103,6 +98,25 @@ export const createTicketChannel = async (
     await channel.send({
       content: `<@${interaction.user.id}>`,
       embeds: [embed],
+      components: [
+        new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId('claim_ticket')
+            .setLabel('Claim')
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji('🏷️'),
+          new ButtonBuilder()
+            .setCustomId('unclaim_ticket')
+            .setLabel('Unclaim')
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji('❌'),
+          new ButtonBuilder()
+            .setCustomId('close_ticket')
+            .setLabel('Close')
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji('🔒'),
+        ),
+      ],
     });
   } catch (err) {
     interaction.reply({
@@ -110,4 +124,77 @@ export const createTicketChannel = async (
       flags: MessageFlags.Ephemeral,
     });
   }
+};
+
+export const closeTicket = async (client, interaction) => {
+  const channel = interaction.channel;
+  const userOverwrite = channel.permissionOverwrites.cache.find(
+    (overwrite) => overwrite.type === 1,
+  );
+
+  if (!userOverwrite) {
+    await interaction.reply({
+      embeds: [
+        errorEmbed(
+          "Couldn't find the ticket creator to close the ticket.",
+        ),
+      ],
+      flags: MessageFlags.Ephemeral,
+    });
+    return;
+  }
+
+  const userId = userOverwrite.id;
+  await channel.permissionOverwrites.delete(userId);
+  await channel.edit({
+    name: `closed-${channel.name.split('-')[1]}`
+  })
+
+  await interaction.deferUpdate();
+  await interaction.channel.send({
+    embeds: [errorEmbed(`Ticket closed by <@${interaction.user.id}>`)],
+    components: [
+      new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId('reopen_ticket')
+          .setLabel('Open')
+          .setStyle(ButtonStyle.Secondary)
+          .setEmoji('🔓'),
+        new ButtonBuilder()
+          .setCustomId('delete_ticket')
+          .setLabel('Delete')
+          .setStyle(ButtonStyle.Secondary)
+          .setEmoji('⛔'),
+      ),
+    ],
+  });
+
+  await client.db.set(
+    `${interaction.channel.id}-status`,
+    `closed-${userId}`,
+  );
+};
+
+export const reopenTicket = async (client, interaction) => {
+  const channel = interaction.channel;
+  const channelStatus = await client.db.get(`${channel.id}-status`);
+  const userId = channelStatus.split('-')[1];
+
+  await channel.permissionOverwrites.create(userId, {
+    ViewChannel: true,
+    SendMessages: true,
+    ReadMessageHistory: true,
+  });
+
+  await channel.edit({
+    name: `ticket-${channel.name.split('-')[1]}`
+  })
+
+  await client.db.set(`${interaction.channel.id}-status`, 'open');
+  await interaction.message.edit({ components: [] });
+  await interaction.channel.send({
+    embeds: [
+      successEmbed(`Ticket reopened by <@${interaction.user.id}>`),
+    ],
+  });
 };

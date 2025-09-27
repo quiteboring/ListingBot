@@ -27,6 +27,5 @@ export const createModal = async (
   });
 
   modal.addComponents(components);
-
   await interaction.showModal(modal);
 };

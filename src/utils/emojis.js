@@ -3,6 +3,7 @@ import path from 'path';
 import { fileURLToPath } from 'url';
 import { MessageFlags } from 'discord.js';
 import { errorEmbed, infoEmbed, successEmbed } from './embed.js';
+import { logger } from './logger.js';
 
 export const uploadEmojis = async (client, interaction) => {
   await interaction.deferReply({ flags: MessageFlags.Ephemeral });
@@ -48,7 +49,8 @@ export const uploadEmojis = async (client, interaction) => {
       embeds: [successEmbed('Successfully uploaded emojis!')],
     });
   } catch (error) {
-    console.log(error);
+    logger.error(error);
+
     await interaction.editReply({
       embeds: [errorEmbed('No permissions to upload.')],
     });

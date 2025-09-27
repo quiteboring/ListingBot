@@ -88,7 +88,7 @@ export default {
         break;
       case 'seller':
         const role = interaction.options.getRole('seller');
-        await client.db.set('seller', role.id);
+        await client.db.set('seller_role', role.id);
         await interaction.reply({
           embeds: [
             successEmbed(
@@ -97,6 +97,7 @@ export default {
           ],
           flags: MessageFlags.Ephemeral,
         });
+        
         break;
     }
   },

@@ -23,6 +23,7 @@ export default class Bot extends Client {
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.MessageContent,
+        GatewayIntentBits.DirectMessageTyping,
       ],
     });
 

@@ -1,4 +1,5 @@
 import { MessageFlags } from 'discord.js';
+import { logger } from '../utils/logger.js';
 
 export default {
   name: 'interactionCreate',
@@ -21,7 +22,7 @@ export default {
         flags: MessageFlags.Ephemeral,
       };
 
-      console.log(error);
+      logger.error(error);
 
       if (interaction.deferred) {
         await interaction.editReply(content);
