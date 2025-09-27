@@ -31,7 +31,7 @@ export const uploadEmojis = async (client, interaction) => {
       const emojiName = path.basename(file, '.png');
 
       if (
-        interaction.guild.emojis.cache.some(
+        await interaction.guild.emojis.cache.some(
           (e) => e.name === emojiName,
         )
       )

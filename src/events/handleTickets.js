@@ -18,9 +18,16 @@ export default {
 
     switch (interaction.customId) {
       case 'claim_ticket':
-        if (!hasSellerRole(client, interaction) && !hasAdmin(interaction)) {
+        if (
+          !hasSellerRole(client, interaction) &&
+          !hasAdmin(interaction)
+        ) {
           await interaction.reply({
-            embeds: [errorEmbed('You are not a seller to claim this ticket.')],
+            embeds: [
+              errorEmbed(
+                'You are not a seller to claim this ticket.',
+              ),
+            ],
             flags: MessageFlags.Ephemeral,
           });
 
@@ -37,22 +44,41 @@ export default {
         }
 
         await interaction.deferUpdate();
-        await client.db.set(`${interaction.channel.id}-status`, `claimed-${interaction.user.id}`)
+        await client.db.set(
+          `${interaction.channel.id}-status`,
+          `claimed-${interaction.user.id}`,
+        );
         await interaction.channel.send({
-          embeds: [successEmbed(`Ticket claimed by <@${interaction.user.id}>`)]
-        })
+          embeds: [
+            successEmbed(
+              `Ticket claimed by <@${interaction.user.id}>`,
+            ),
+          ],
+        });
         break;
       case 'unclaim_ticket':
-        if (!hasSellerRole(client, interaction) && !hasAdmin(interaction)) {
+        if (
+          !hasSellerRole(client, interaction) &&
+          !hasAdmin(interaction)
+        ) {
           await interaction.reply({
-            embeds: [errorEmbed('You are not a seller to unclaim this ticket.')],
+            embeds: [
+              errorEmbed(
+                'You are not a seller to unclaim this ticket.',
+              ),
+            ],
             flags: MessageFlags.Ephemeral,
           });
 
           break;
         }
 
-        if (channelStatus && (!channelStatus.startsWith('claimed') || (interaction.user.id != channelStatus.split('-')[1] && !hasAdmin(interaction)))) {
+        if (
+          channelStatus &&
+          (!channelStatus.startsWith('claimed') ||
+            (interaction.user.id != channelStatus.split('-')[1] &&
+              !hasAdmin(interaction)))
+        ) {
           await interaction.reply({
             embeds: [errorEmbed('You have not claimed this ticket.')],
             flags: MessageFlags.Ephemeral,
@@ -62,10 +88,17 @@ export default {
         }
 
         await interaction.deferUpdate();
-        await client.db.set(`${interaction.channel.id}-status`, `open`)
+        await client.db.set(
+          `${interaction.channel.id}-status`,
+          `open`,
+        );
         await interaction.channel.send({
-          embeds: [errorEmbed(`Ticket unclaimed by <@${interaction.user.id}>`)]
-        })
+          embeds: [
+            errorEmbed(
+              `Ticket unclaimed by <@${interaction.user.id}>`,
+            ),
+          ],
+        });
         break;
       case 'close_ticket':
         if (channelStatus && channelStatus.startsWith('closed')) {
@@ -77,9 +110,16 @@ export default {
           break;
         }
 
-        if (!hasSellerRole(client, interaction) && !hasAdmin(interaction)) {
+        if (
+          !hasSellerRole(client, interaction) &&
+          !hasAdmin(interaction)
+        ) {
           await interaction.reply({
-            embeds: [errorEmbed('You do not have permission to close the ticket.')],
+            embeds: [
+              errorEmbed(
+                'You do not have permission to close the ticket.',
+              ),
+            ],
             flags: MessageFlags.Ephemeral,
           });
 
@@ -98,9 +138,16 @@ export default {
           break;
         }
 
-        if (!hasSellerRole(client, interaction) && !hasAdmin(interaction)) {
+        if (
+          !hasSellerRole(client, interaction) &&
+          !hasAdmin(interaction)
+        ) {
           await interaction.reply({
-            embeds: [errorEmbed('You do not have permission to reopen the ticket.')],
+            embeds: [
+              errorEmbed(
+                'You do not have permission to reopen the ticket.',
+              ),
+            ],
             flags: MessageFlags.Ephemeral,
           });
 
@@ -116,6 +163,7 @@ export default {
         });
 
         setTimeout(async () => {
+          await client.db.delete(`${interaction.channel.id}-creator`);
           await client.db.delete(`${interaction.channel.id}-status`);
           await interaction.channel.delete();
         }, 3000);

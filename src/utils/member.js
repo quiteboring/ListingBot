@@ -6,11 +6,10 @@ export const hasSellerRole = async (client, interaction) => {
   }
 
   return interaction.member.roles.cache.has(sellerRoleId);
-}
-
+};
 
 export const hasAdmin = async (interaction) => {
   return interaction.member.permissions.has(
     PermissionsBitField.Flags.Administrator,
   );
-}
+};
