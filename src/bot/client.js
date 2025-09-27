@@ -5,7 +5,7 @@ import {
   REST,
   Routes,
 } from 'discord.js';
-import { fileURLToPath } from 'url';
+import { fileURLToPath, pathToFileURL } from 'url';
 import { logger } from '../utils/logger.js';
 import fs from 'fs';
 import path from 'path';
@@ -30,7 +30,9 @@ export default class Bot extends Client {
     this.token = token;
     this.clientId = clientId;
 
-    this.db = new QuickDB({ filePath: 'database.sqlite' });
+    // Use database URL or 'database.sqlite'
+    const dbPath = databaseUrl || 'database.sqlite';
+    this.db = new QuickDB({ filePath: dbPath });
 
     this.commands = new Collection();
     this.rest = new REST().setToken(this.token);
@@ -48,7 +50,7 @@ export default class Bot extends Client {
 
     for (const file of commandFiles) {
       const filePath = path.join(commandsPath, file);
-      const command = await import(filePath);
+      const command = await import(pathToFileURL(filePath).href);
 
       if ('data' in command.default && 'execute' in command.default) {
         this.commands.set(command.default.data.name, command.default);
@@ -88,7 +90,7 @@ export default class Bot extends Client {
 
     for (const file of eventFiles) {
       const filePath = path.join(eventsPath, file);
-      const event = await import(filePath);
+      const event = await import(`file://${filePath}`);
 
       this.on(
         event.default.name,
