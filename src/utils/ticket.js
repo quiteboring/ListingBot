@@ -11,6 +11,7 @@ import {
   TextChannel,
 } from 'discord.js';
 import config from '../config.js';
+import { createTranscript } from 'discord-html-transcripts';
 
 export const saveTicketsCategory = async (client, interaction) => {
   const category = interaction.options.getChannel('category');
@@ -160,6 +161,11 @@ export const closeTicket = async (client, interaction) => {
               .setLabel('Open')
               .setStyle(ButtonStyle.Secondary)
               .setEmoji('🔓'),
+            new ButtonBuilder()
+              .setCustomId('gen_transcript')
+              .setLabel('Transcript')
+              .setStyle(ButtonStyle.Secondary)
+              .setEmoji('📄'),
             new ButtonBuilder()
               .setCustomId('delete_ticket')
               .setLabel('Delete')

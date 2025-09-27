@@ -23,7 +23,9 @@ export const uploadEmojis = async (client, interaction) => {
     }
 
     await interaction.editReply({
-      embeds: [infoEmbed(`Processing ${imageFiles.length} images...`)],
+      embeds: [
+        infoEmbed(`Processing ${imageFiles.length} images...`),
+      ],
     });
 
     let createdCount = 0;
@@ -38,7 +40,10 @@ export const uploadEmojis = async (client, interaction) => {
       );
 
       if (existingEmoji) {
-        await client.db.set(existingEmoji.name, existingEmoji.toString());
+        await client.db.set(
+          existingEmoji.name,
+          existingEmoji.toString(),
+        );
         updatedCount++;
       } else {
         const newEmoji = await interaction.guild.emojis.create({

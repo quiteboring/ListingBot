@@ -2,6 +2,7 @@ import { MessageFlags } from 'discord.js';
 import { closeTicket, reopenTicket } from '../utils/ticket.js';
 import { errorEmbed, successEmbed } from '../utils/embed.js';
 import { hasAdmin, hasSellerRole } from '../utils/member.js';
+import { createTranscript } from 'discord-html-transcripts';
 
 export default {
   name: 'interactionCreate',
@@ -167,6 +168,39 @@ export default {
           await client.db.delete(`${interaction.channel.id}-status`);
           await interaction.channel.delete();
         }, 3000);
+        break;
+      case 'gen_transcript':
+        if (
+          !hasSellerRole(client, interaction) &&
+          !hasAdmin(interaction)
+        ) {
+          await interaction.reply({
+            embeds: [
+              errorEmbed(
+                'You do not have permissions to generate a transcript.',
+              ),
+            ],
+            flags: MessageFlags.Ephemeral,
+          });
+
+          break;
+        }
+
+        await interaction.deferUpdate();
+
+        const transcript = await createTranscript(
+          interaction.channel,
+          { limit: -1 },
+        );
+
+        await interaction.channel.send({
+          embeds: [successEmbed('Generated a transcript!')]
+        });
+        
+        await interaction.channel.send({
+          files: [transcript]
+        })
+
         break;
     }
   },

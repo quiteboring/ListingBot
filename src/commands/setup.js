@@ -56,6 +56,17 @@ export default {
     )
     .addSubcommand((sub) =>
       sub
+        .setName('accounts')
+        .setDescription('Set the category for listing accounts.')
+        .addChannelOption((input) =>
+          input
+            .setName('category')
+            .setDescription('The category to list accounts in.')
+            .setRequired(true),
+        ),
+    )
+    .addSubcommand((sub) =>
+      sub
         .setName('tickets')
         .setDescription('Set the category for tickets.')
         .addChannelOption((input) =>
@@ -84,6 +95,9 @@ export default {
         await sendExchangeEmbed(interaction);
         break;
       case 'tickets':
+        await saveTicketsCategory(client, interaction);
+        break;
+      case 'accounts':
         await saveTicketsCategory(client, interaction);
         break;
       case 'seller':
