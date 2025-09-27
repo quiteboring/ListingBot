@@ -85,7 +85,13 @@ export default {
           });
           await client.db.set(emoji.name, emoji.toString());
           created++;
-          await new Promise((r) => setTimeout(r, 1000));
+
+          // rate limiting
+          if (created % 5 === 0) {
+            await new Promise((r) => setTimeout(r, 1000));
+          } else {
+            await new Promise((r) => setTimeout(r, 200));
+          }
         }
       }
 
