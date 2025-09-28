@@ -14,7 +14,7 @@ import {
 } from '../utils/embed.js';
 import { fileURLToPath } from 'url';
 import { logger } from '../utils/logger.js';
-import config from '../config.js';
+import config from '../colors.js';
 import path from 'path';
 import fs from 'fs/promises';
 
@@ -40,6 +40,7 @@ export default {
    */
   async execute(client, interaction) {
     const sub = interaction.options.getSubcommand();
+
     if (sub === 'emojis')
       return this.handleEmojis(client, interaction);
     if (sub === 'wizard')

@@ -6,7 +6,7 @@ import {
   MessageFlags,
   RoleSelectMenuBuilder,
 } from 'discord.js';
-import config from '../config.js';
+import config from '../colors.js';
 import { errorEmbed, successEmbed } from '../utils/embed.js';
 
 export default {

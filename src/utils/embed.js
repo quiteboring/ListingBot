@@ -1,4 +1,4 @@
-import config from '../config.js';
+import config from '../colors.js';
 import { EmbedBuilder } from 'discord.js';
 
 export const mainEmbed = (title) => {

@@ -39,7 +39,7 @@ export default class Bot extends Client {
   async loadCommands() {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
-    
+
     const commandsPath = path.join(__dirname, '../commands');
     const commandFiles = fs
       .readdirSync(commandsPath)
