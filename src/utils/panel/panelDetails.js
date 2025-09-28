@@ -4,7 +4,6 @@ import {
   ButtonStyle,
   EmbedBuilder,
   Message,
-  MessageFlags,
   ModalBuilder,
   TextInputBuilder,
   TextInputStyle,
@@ -55,24 +54,6 @@ export const handleDetailsSubmission = async (
   const panelDescription = interaction.fields.getTextInputValue(
     'panel_description',
   );
-
-  // validate input lengths
-  if (panelTitle.length > 256) {
-    await interaction.followUp({
-      content: 'Panel title must be 256 characters or less.',
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
-  }
-
-  if (panelDescription.length > 4096) {
-    await interaction.followUp({
-      content: 'Panel description must be 4096 characters or less.',
-      flags: MessageFlags.Ephemeral,
-    });
-    return;
-  }
-
   const msg = interaction.message;
 
   const firstEmbed = EmbedBuilder.from(msg.embeds[0])

@@ -13,23 +13,14 @@ const getTimestamp = () => {
 };
 
 const log = (level, message, color) => {
-  // handle multiple arguments by formatting them as a single message????? idk how to explain this or wtf went wrong
-  const formattedMessage = Array.isArray(message)
-    ? message.map(arg =>
-        typeof arg === 'object' && arg instanceof Error
-          ? `${arg.message}\n${arg.stack || ''}`
-          : String(arg)
-      ).join(' ')
-    : message;
-
   console.log(
-    `${color}${colors.bold}[${getTimestamp()}] [${level.toUpperCase()}] - ${formattedMessage}${colors.reset}`,
+    `${color}${colors.bold}[${getTimestamp()}] [${level.toUpperCase()}] - ${message}${colors.reset}`,
   );
 };
 
 export const logger = {
-  info: (...args) => log('info', args, colors.green),
-  warn: (...args) => log('warn', args, colors.yellow),
-  error: (...args) => log('error', args, colors.red),
-  debug: (...args) => log('debug', args, colors.blue),
+  info: (message) => log('info', message, colors.green),
+  warn: (message) => log('warn', message, colors.yellow),
+  error: (message) => log('error', message, colors.red),
+  debug: (message) => log('debug', message, colors.blue),
 };
