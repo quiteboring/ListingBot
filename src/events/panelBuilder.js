@@ -7,6 +7,7 @@ import {
   handleAddButtonSubmission,
   handleRemoveButton,
 } from '../utils/panel/panelButtons.js';
+import { logger } from '../utils/logger.js';
 
 export default {
   name: 'interactionCreate',
@@ -17,37 +18,53 @@ export default {
    */
   async execute(client, interaction) {
     try {
+      // validate interaction
+      if (!interaction) {
+        logger.warn('PanelBuilder: Received null or undefined interaction');
+        return;
+      }
+
       if (interaction.isButton()) {
-        switch (interaction.customId) {
-          case 'set_panel_details':
-            return await sendDetailsModal(client, interaction);
-          case 'add_panel_button':
-            return await sendAddButtonModal(client, interaction);
-          case 'remove_panel_button':
-            return await handleRemoveButton(client, interaction);
-          case 'next_step':
-            break;
-          default:
-            return;
+        try {
+          switch (interaction.customId) {
+            case 'set_panel_details':
+              return await sendDetailsModal(client, interaction);
+            case 'add_panel_button':
+              return await sendAddButtonModal(client, interaction);
+            case 'remove_panel_button':
+              return await handleRemoveButton(client, interaction);
+            case 'next_step':
+              break;
+            default:
+              return;
+          }
+        } catch (error) {
+          logger.error(`Error handling button interaction (${interaction.customId}):`, error);
+          throw error;
         }
       }
 
       if (interaction.isModalSubmit()) {
-        if (
-          interaction.customId.startsWith('add_panel_button_modal_')
-        ) {
-          return await handleAddButtonSubmission(client, interaction);
-        }
+        try {
+          if (
+            interaction.customId.startsWith('add_panel_button_modal_')
+          ) {
+            return await handleAddButtonSubmission(client, interaction);
+          }
 
-        switch (interaction.customId) {
-          case 'set_panel_details':
-            return await handleDetailsSubmission(client, interaction);
-          default:
-            return;
+          switch (interaction.customId) {
+            case 'set_panel_details':
+              return await handleDetailsSubmission(client, interaction);
+            default:
+              return;
+          }
+        } catch (error) {
+          logger.error(`Error handling modal submission (${interaction.customId}):`, error);
+          throw error;
         }
       }
     } catch (err) {
-      console.error('Error during interaction handling:', err);
+      logger.error('Error during panel builder interaction handling:', err);
     }
   },
 };
