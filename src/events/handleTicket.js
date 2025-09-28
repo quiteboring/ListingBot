@@ -1,4 +1,15 @@
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  Guild,
+  MessageFlags,
+  TextChannel,
+} from 'discord.js';
 import { createTicket, showModal } from '../utils/tickets.js';
+import { errorEmbed, successEmbed } from '../utils/embed.js';
+import { createTranscript } from 'discord-html-transcripts';
+import { hasAdmin, isSeller } from '../utils/member.js';
 
 export default {
   name: 'interactionCreate',
@@ -133,15 +144,256 @@ export default {
   },
 
   // Within ticket handling
-  async closeTicket(client, interaction) {},
+  async closeTicket(client, interaction) {
+    if (!isSeller(client, interaction) && !hasAdmin(interaction)) {
+      await interaction.reply({
+        embeds: [
+          errorEmbed(
+            'You do not have permissions to reopen the ticket.',
+          ),
+        ],
+        flags: MessageFlags.Ephemeral,
+      });
 
-  async reopenTicket(client, interaction) {},
+      return;
+    }
 
-  async deleteTicket(client, interaction) {},
+    const channel = interaction.channel;
+    const key = `ticket_${interaction.guild.id}_${interaction.channel.id}`;
+    const ticket = await client.db.get(key);
 
-  async transcriptTicket(client, interaction) {},
+    if (!ticket || !ticket.creatorId) {
+      return interaction.reply({
+        embeds: [errorEmbed('Ticket data not found.')],
+        flags: MessageFlags.Ephemeral,
+      });
+    }
 
-  async claimTicket(client, interaction) {},
+    await channel.permissionOverwrites.edit(ticket.creatorId, {
+      ViewChannel: false,
+      SendMessages: false,
+      ReadMessageHistory: false,
+    });
 
-  async unclaimTicket(client, interaction) {},
+    ticket.status = 'closed';
+    const msg = await interaction.channel.messages.fetch(
+      ticket.message,
+    );
+
+    await client.db.set(key, ticket);
+    await interaction.deferUpdate();
+    await msg.edit({
+      components: [],
+    });
+
+    await channel.send({
+      embeds: [
+        errorEmbed(`Ticket closed by <@${interaction.user.id}>`),
+      ],
+
+      components: [
+        new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId('reopen_ticket')
+            .setLabel('Open')
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji('🔓'),
+          new ButtonBuilder()
+            .setCustomId('transcript_ticket')
+            .setLabel('Transcript')
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji('📄'),
+          new ButtonBuilder()
+            .setCustomId('delete_ticket')
+            .setLabel('Delete')
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji('⛔'),
+        ),
+      ],
+    });
+  },
+
+  async reopenTicket(client, interaction) {
+    if (!isSeller(client, interaction) && !hasAdmin(interaction)) {
+      await interaction.reply({
+        embeds: [
+          errorEmbed(
+            'You do not have permissions to reopen the ticket.',
+          ),
+        ],
+        flags: MessageFlags.Ephemeral,
+      });
+
+      return;
+    }
+
+    const channel = interaction.channel;
+    const key = `ticket_${interaction.guild.id}_${channel.id}`;
+    const ticket = await client.db.get(key);
+    const msg = interaction.message;
+    const ticketMsg = await channel.messages.fetch(ticket.message);
+
+    if (!ticket || !ticket.creatorId) {
+      return interaction.reply({
+        embeds: [errorEmbed('Ticket data not found.')],
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    await channel.permissionOverwrites.edit(ticket.creatorId, {
+      ViewChannel: true,
+      SendMessages: true,
+      ReadMessageHistory: true,
+    });
+
+    ticket.status = 'open';
+    await interaction.deferUpdate();
+    await client.db.set(key, ticket);
+    await channel.send({
+      embeds: [
+        successEmbed(`Ticket reopened by <@${interaction.user.id}>`),
+      ],
+    });
+    await msg.edit({
+      components: [],
+    });
+
+    await ticketMsg.edit({
+      components: [
+        new ActionRowBuilder().addComponents(
+          new ButtonBuilder()
+            .setCustomId('claim_ticket')
+            .setLabel('Claim')
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji('🏷️'),
+          new ButtonBuilder()
+            .setCustomId('unclaim_ticket')
+            .setLabel('Unclaim')
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji('❌'),
+          new ButtonBuilder()
+            .setCustomId('close_ticket')
+            .setLabel('Close')
+            .setStyle(ButtonStyle.Secondary)
+            .setEmoji('🔒'),
+        ),
+      ],
+    });
+  },
+
+  async deleteTicket(client, interaction) {
+    if (!isSeller(client, interaction) && !hasAdmin(interaction)) {
+      await interaction.reply({
+        embeds: [
+          errorEmbed(
+            'You do not have permissions to delete the ticket.',
+          ),
+        ],
+        flags: MessageFlags.Ephemeral,
+      });
+
+      return;
+    }
+
+    await interaction.reply({
+      embeds: [errorEmbed('Deleting channel in 3 seconds.')],
+      flags: MessageFlags.Ephemeral,
+    });
+
+    setTimeout(async () => {
+      await client.db.delete(
+        `ticket_${interaction.guild.id}_${interaction.channel.id}`,
+      );
+      await interaction.channel.delete();
+    }, 3000);
+  },
+
+  async transcriptTicket(client, interaction) {
+    if (!isSeller(client, interaction) && !hasAdmin(interaction)) {
+      await interaction.reply({
+        embeds: [
+          errorEmbed(
+            'You do not have permissions to generate a transcript.',
+          ),
+        ],
+        flags: MessageFlags.Ephemeral,
+      });
+
+      return;
+    }
+
+    const transcript = await createTranscript(interaction.channel, {
+      limit: -1,
+    });
+
+    await interaction.reply({
+      files: [transcript],
+      flags: MessageFlags.Ephemeral,
+    });
+  },
+
+  async claimTicket(client, interaction) {
+    const channel = interaction.channel;
+    const key = `ticket_${interaction.guild.id}_${channel.id}`;
+    const ticket = await client.db.get(key);
+
+    if (!ticket) {
+      return interaction.reply({
+        embeds: [errorEmbed('Ticket data not found.')],
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    const isSellerUser = await isSeller(client, interaction);
+
+    if ((!isSellerUser && !hasAdmin(interaction)) || ticket.claimedBy != 'none') {
+      await interaction.reply({
+        embeds: [errorEmbed('You cannot claim this ticket.')],
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+
+    ticket.claimedBy = interaction.user.id;
+    await client.db.set(key, ticket);
+
+    await interaction.deferUpdate();
+    await channel.send({
+      embeds: [
+        successEmbed(`Ticket claimed by <@${ticket.claimedBy}>`),
+      ],
+    });
+  },
+
+  async unclaimTicket(client, interaction) {
+    const channel = interaction.channel;
+    const key = `ticket_${interaction.guild.id}_${channel.id}`;
+    const ticket = await client.db.get(key);
+
+    if (!ticket) {
+      return interaction.reply({
+        embeds: [errorEmbed('Ticket data not found.')],
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    const isSellerUser = await isSeller(client, interaction);
+    if ((!isSellerUser && !hasAdmin(interaction)) || ticket.claimedBy != interaction.user.id) {
+      await interaction.reply({
+        embeds: [errorEmbed('You cannot unclaim this ticket.')],
+        flags: MessageFlags.Ephemeral,
+      });
+      return;
+    }
+
+    ticket.claimedBy = 'none';
+    await client.db.set(key, ticket);
+    
+    await interaction.deferUpdate();
+    await channel.send({
+      embeds: [
+        errorEmbed(`Ticket unclaimed by <@${interaction.user.id}>`),
+      ],
+    });
+  },
 };

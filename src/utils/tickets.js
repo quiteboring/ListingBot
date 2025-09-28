@@ -114,7 +114,7 @@ export const createTicket = async (client, interaction) => {
     rawIndex + 1,
   );
 
-  await channel.send({
+  const msg = await channel.send({
     content: `<@${interaction.user.id}>`,
     embeds: [
       new EmbedBuilder()
@@ -155,4 +155,14 @@ export const createTicket = async (client, interaction) => {
       ),
     ],
   });
+
+  await client.db.set(
+    `ticket_${interaction.guild.id}_${channel.id}`,
+    {
+      creatorId: interaction.user.id,
+      message: msg.id,
+      status: 'open',
+      claimedBy: 'none',
+    },
+  );
 };
