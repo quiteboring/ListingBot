@@ -7,8 +7,7 @@ import {
   SlashCommandBuilder,
   StringSelectMenuBuilder,
 } from 'discord.js';
-import { mainEmbed, successEmbed } from '../utils/embed.js';
-import config from '../colors.js';
+import { successEmbed } from '../utils/embed.js';
 import colors from '../colors.js';
 
 export default {
@@ -33,9 +32,9 @@ export default {
     )
     .addSubcommand((sub) =>
       sub
-        .setName('account')
+        .setName('sellaccount')
         .setDescription(
-          'Create a custom account panel. (mining/farming ready account)',
+          'Create a sell account panel.',
         ),
     ),
 
@@ -55,8 +54,8 @@ export default {
       case 'mfa':
         await this.sendMfaPanel(client, interaction);
         break;
-      case 'account':
-        await this.sendAccountPanel(client, interaction);
+      case 'sellaccount':
+        await this.sendSellAccountPanel(client, interaction);
         break;
     }
 
@@ -185,7 +184,7 @@ export default {
         (r) =>
           r.price !== null &&
           r.price !== undefined &&
-          r.price == 'none',
+          r.price !== 'none',
       );
 
     await interaction.channel.send({
@@ -218,14 +217,14 @@ export default {
     });
   },
 
-  async sendAccountPanel(client, interaction) {
+  async sendSellAccountPanel(client, interaction) {
     await interaction.channel.send({
-      embeds: [this.baseEmbed('Account', [])],
+      embeds: [this.baseEmbed('Sell Account', [])],
 
       components: this.singleRow(
         new ButtonBuilder()
           .setCustomId('sell_account_ticket')
-          .setStyle(ButtonStyle.Danger)
+          .setStyle(ButtonStyle.Secondary)
           .setLabel('Sell Account')
           .setEmoji('💰'),
       ),
