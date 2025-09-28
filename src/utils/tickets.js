@@ -9,6 +9,7 @@ import {
   MessageFlags,
   PermissionsBitField,
   ChannelType,
+  User,
 } from 'discord.js';
 import { errorEmbed } from './embed.js';
 import colors from '../colors.js';
@@ -130,8 +131,10 @@ export const createTicket = async (client, interaction) => {
           fields.length ? [spacer, ...fields, spacer] : [spacer],
         )
         .setFooter({
-          text: 'Made by Nathan | https://quiteboring.dev',
+          iconURL: interaction.user.displayAvatarURL(),
+          text: `Created by ${interaction.user.displayName}`,
         })
+        .setTimestamp(Date.now())
         .setColor(colors.mainColor),
     ],
     components: [
