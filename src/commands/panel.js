@@ -33,9 +33,7 @@ export default {
     .addSubcommand((sub) =>
       sub
         .setName('sellaccount')
-        .setDescription(
-          'Create a sell account panel.',
-        ),
+        .setDescription('Create a sell account panel.'),
     ),
 
   async execute(client, interaction) {
@@ -243,8 +241,7 @@ export default {
 
     if (fields.length != 0)
       embed.setFields([spacer, ...fields, spacer]);
-    else 
-      embed.setFields([spacer])
+    else embed.setFields([spacer]);
 
     return embed;
   },
