@@ -69,11 +69,11 @@ export default {
    */
   async sendCoinPanel(client, interaction) {
     const buyPrice =
-      (await client.db.get(`config_${interaction.guild.id}`)
-        .coinBuyPrice) || 'unknown';
+      (await client.db.get(`config_${interaction.guild.id}`))
+        .coinBuyPrice || 'unknown';
     const sellPrice =
-      (await client.db.get(`config_${interaction.guild.id}`)
-        .coinSellPrice) || 'unknown';
+      (await client.db.get(`config_${interaction.guild.id}`))
+        .coinSellPrice || 'unknown';
 
     await interaction.channel.send({
       embeds: [
@@ -113,8 +113,8 @@ export default {
 
   async sendMiddlemanPanel(client, interaction) {
     const details =
-      (await client.db.get(`config_${interaction.guild.id}`)
-        .middlemanDetails) || 'No Details Provided';
+      (await client.db.get(`config_${interaction.guild.id}`))
+        .middlemanDetails || 'No Details Provided';
 
     await interaction.channel.send({
       embeds: [
@@ -138,8 +138,8 @@ export default {
 
   async sendExchangePanel(client, interaction) {
     const details =
-      (await client.db.get(`config_${interaction.guild.id}`)
-        .exchangeDetails) || 'No Details Provided';
+      (await client.db.get(`config_${interaction.guild.id}`))
+        .exchangeDetails || 'No Details Provided';
 
     await interaction.channel.send({
       embeds: [

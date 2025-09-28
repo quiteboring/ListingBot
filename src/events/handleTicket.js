@@ -346,7 +346,10 @@ export default {
 
     const isSellerUser = await isSeller(client, interaction);
 
-    if ((!isSellerUser && !hasAdmin(interaction)) || ticket.claimedBy != 'none') {
+    if (
+      (!isSellerUser && !hasAdmin(interaction)) ||
+      ticket.claimedBy != 'none'
+    ) {
       await interaction.reply({
         embeds: [errorEmbed('You cannot claim this ticket.')],
         flags: MessageFlags.Ephemeral,
@@ -378,7 +381,10 @@ export default {
     }
 
     const isSellerUser = await isSeller(client, interaction);
-    if ((!isSellerUser && !hasAdmin(interaction)) || ticket.claimedBy != interaction.user.id) {
+    if (
+      (!isSellerUser && !hasAdmin(interaction)) ||
+      ticket.claimedBy != interaction.user.id
+    ) {
       await interaction.reply({
         embeds: [errorEmbed('You cannot unclaim this ticket.')],
         flags: MessageFlags.Ephemeral,
@@ -388,7 +394,7 @@ export default {
 
     ticket.claimedBy = 'none';
     await client.db.set(key, ticket);
-    
+
     await interaction.deferUpdate();
     await channel.send({
       embeds: [

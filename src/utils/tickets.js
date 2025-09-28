@@ -13,11 +13,11 @@ import {
 import { errorEmbed } from './embed.js';
 import colors from '../colors.js';
 
-export const showModal = async (interaction, options) => {
+export const showModal = async (interaction, options, id) => {
   const modal = new ModalBuilder()
-    .setCustomId(interaction.customId)
+    .setCustomId(id || interaction.customId)
     .setTitle(
-      interaction.customId
+      (id || interaction.customId)
         .replace('_ticket', '')
         .split('_')
         .map((word) => word[0].toUpperCase() + word.slice(1))
@@ -36,7 +36,6 @@ export const showModal = async (interaction, options) => {
   });
 
   modal.addComponents(rows);
-
   await interaction.showModal(modal);
 };
 
