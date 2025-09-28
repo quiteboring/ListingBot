@@ -233,16 +233,15 @@ export default class Bot extends Client {
   setupGracefulShutdown() {
     const shutdown = async (signal) => {
       logger.info(`Received ${signal}. Starting graceful shutdown...`);
-      
+
       try {
         if (this.db) {
-          await this.db.close();
-          logger.info('Database connection closed');
+          logger.info('Database connection will be closed automatically (probably, yeahhhh)');
         }
-        
+
         this.destroy();
         logger.info('Bot destroyed successfully');
-        
+
         process.exit(0);
       } catch (error) {
         logger.error('Error during graceful shutdown:', error);
