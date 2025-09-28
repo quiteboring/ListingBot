@@ -229,7 +229,7 @@ export default {
     });
   },
 
-  baseEmbed(type, fields = []) {
+  baseEmbed(type, fields) {
     const spacer = { name: ' ', value: ' ' };
     const embed = new EmbedBuilder()
       .setTitle(`${type} Panel`)

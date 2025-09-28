@@ -11,6 +11,8 @@ export default {
    * @param {import('discord.js').ChatInputCommandInteraction} interaction
    */
   async execute(client, interaction) {
-    await interaction.reply({ embeds: [mainEmbed('To be implemented!')] });
+    await interaction.reply({
+      embeds: [mainEmbed('To be implemented!')],
+    });
   },
 };

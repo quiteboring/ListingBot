@@ -1,0 +1,158 @@
+import {
+  ModalBuilder,
+  TextInputBuilder,
+  TextInputStyle,
+  ActionRowBuilder,
+  EmbedBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  MessageFlags,
+  PermissionsBitField,
+  ChannelType,
+} from 'discord.js';
+import { errorEmbed } from './embed.js';
+import colors from '../colors.js';
+
+export const showModal = async (interaction, options) => {
+  const modal = new ModalBuilder()
+    .setCustomId(interaction.customId)
+    .setTitle(
+      interaction.customId
+        .replace('_ticket', '')
+        .split('_')
+        .map((word) => word[0].toUpperCase() + word.slice(1))
+        .join(' '),
+    );
+
+  const rows = options.map((opt) => {
+    const input = new TextInputBuilder()
+      .setCustomId(opt.customId)
+      .setLabel(opt.label)
+      .setStyle(opt.style || TextInputStyle.Short)
+      .setPlaceholder(opt.placeholder || '')
+      .setRequired(opt.required ?? true);
+
+    return new ActionRowBuilder().addComponents(input);
+  });
+
+  modal.addComponents(rows);
+
+  await interaction.showModal(modal);
+};
+
+export const createTicket = async (client, interaction) => {
+  const setup = await client.db.get(`setup_${interaction.guild.id}`);
+  const rawIndex =
+    (await client.db.get(`ticket_count_${interaction.guild.id}`)) ||
+    1;
+  const index =
+    rawIndex < 10000
+      ? String(rawIndex).padStart(4, '0')
+      : String(rawIndex);
+
+  if (!setup || !setup.ticketCategory || !setup.sellerRoles) {
+    return await interaction.reply({
+      embeds: [errorEmbed('Tickets have not properly been setup.')],
+      flags: MessageFlags.Ephemeral,
+    });
+  }
+
+  let fields = [];
+
+  if (interaction.isModalSubmit()) {
+    fields = interaction.fields.fields.map((input, key) => ({
+      name: key
+        .replace(/_/g, ' ')
+        .replace(/\b\w/g, (c) => c.toUpperCase()),
+      value: input.value || 'N/A',
+    }));
+  } else if (interaction.isStringSelectMenu()) {
+    fields = [
+      {
+        name: 'Selected Rank',
+        value: interaction.values[0]
+          .replace(/^mfa/i, '')
+          .replace(/plus/i, '+')
+          .replace(/^\w/, (c) => c.toUpperCase()),
+      },
+    ];
+  }
+
+  await interaction.deferUpdate();
+
+  const spacer = { name: ' ', value: ' ' };
+  const channel = await interaction.guild.channels.create({
+    name: `ticket-${index}`,
+    type: ChannelType.GuildText,
+    parent: setup.ticketCategory,
+    permissionOverwrites: [
+      {
+        id: interaction.guild.id,
+        deny: [PermissionsBitField.Flags.ViewChannel],
+      },
+      {
+        id: interaction.user.id,
+        allow: [
+          PermissionsBitField.Flags.ViewChannel,
+          PermissionsBitField.Flags.SendMessages,
+          PermissionsBitField.Flags.ReadMessageHistory,
+        ],
+      },
+      ...setup.sellerRoles.map((roleId) => ({
+        id: roleId,
+        allow: [
+          PermissionsBitField.Flags.ViewChannel,
+          PermissionsBitField.Flags.SendMessages,
+          PermissionsBitField.Flags.ReadMessageHistory,
+        ],
+      })),
+    ],
+  });
+
+  await client.db.set(
+    `ticket_count_${interaction.guild.id}`,
+    rawIndex + 1,
+  );
+
+  await channel.send({
+    content: `<@${interaction.user.id}>`,
+    embeds: [
+      new EmbedBuilder()
+        .setDescription('Your ticket has been created!')
+        .setTitle(
+          interaction.customId
+            .replace('_ticket', '')
+            .split('_')
+            .map((word) => word[0].toUpperCase() + word.slice(1))
+            .join(' ')
+            .concat(' Ticket'),
+        )
+        .setFields(
+          fields.length ? [spacer, ...fields, spacer] : [spacer],
+        )
+        .setFooter({
+          text: 'Made by Nathan | https://quiteboring.dev',
+        })
+        .setColor(colors.mainColor),
+    ],
+    components: [
+      new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId('claim_ticket')
+          .setLabel('Claim')
+          .setStyle(ButtonStyle.Secondary)
+          .setEmoji('🏷️'),
+        new ButtonBuilder()
+          .setCustomId('unclaim_ticket')
+          .setLabel('Unclaim')
+          .setStyle(ButtonStyle.Secondary)
+          .setEmoji('❌'),
+        new ButtonBuilder()
+          .setCustomId('close_ticket')
+          .setLabel('Close')
+          .setStyle(ButtonStyle.Secondary)
+          .setEmoji('🔒'),
+      ),
+    ],
+  });
+};
