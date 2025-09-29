@@ -10,6 +10,7 @@ import {
   PermissionsBitField,
   ChannelType,
   User,
+  ModalSubmitFields,
 } from 'discord.js';
 import { errorEmbed } from './embed.js';
 import colors from '../colors.js';
@@ -40,6 +41,10 @@ export const showModal = async (interaction, options, id) => {
   await interaction.showModal(modal);
 };
 
+/**
+ * @param {import("../bot/client").default} client
+ * @param {import("discord.js").Interaction} interaction
+ */
 export const createTicket = async (client, interaction) => {
   const setup = await client.db.get(`setup_${interaction.guild.id}`);
   const rawIndex =
@@ -58,6 +63,7 @@ export const createTicket = async (client, interaction) => {
   }
 
   let fields = [];
+  let middlemanId = null;
 
   if (interaction.isModalSubmit()) {
     fields = interaction.fields.fields.map((input, key) => ({
@@ -66,6 +72,12 @@ export const createTicket = async (client, interaction) => {
         .replace(/\b\w/g, (c) => c.toUpperCase()),
       value: input.value || 'N/A',
     }));
+
+    if (interaction.fields.fields.has('user_id')) {
+      const value = interaction.fields.getTextInputValue('user_id');
+      const user = await interaction.guild.members.fetch(value);
+      middlemanId = user.id;
+    }
   } else if (interaction.isStringSelectMenu()) {
     fields = [
       {
@@ -81,6 +93,12 @@ export const createTicket = async (client, interaction) => {
   await interaction.deferUpdate();
 
   const spacer = { name: ' ', value: ' ' };
+  const userPermissions = [
+    PermissionsBitField.Flags.ViewChannel,
+    PermissionsBitField.Flags.SendMessages,
+    PermissionsBitField.Flags.ReadMessageHistory,
+  ];
+
   const channel = await interaction.guild.channels.create({
     name: `ticket-${index}`,
     type: ChannelType.GuildText,
@@ -90,22 +108,14 @@ export const createTicket = async (client, interaction) => {
         id: interaction.guild.id,
         deny: [PermissionsBitField.Flags.ViewChannel],
       },
-      {
-        id: interaction.user.id,
-        allow: [
-          PermissionsBitField.Flags.ViewChannel,
-          PermissionsBitField.Flags.SendMessages,
-          PermissionsBitField.Flags.ReadMessageHistory,
-        ],
-      },
-      ...setup.sellerRoles.map((roleId) => ({
+      { id: interaction.user.id, allow: userPermissions },
+      ...(setup.sellerRoles || []).map((roleId) => ({
         id: roleId,
-        allow: [
-          PermissionsBitField.Flags.ViewChannel,
-          PermissionsBitField.Flags.SendMessages,
-          PermissionsBitField.Flags.ReadMessageHistory,
-        ],
+        allow: userPermissions,
       })),
+      ...(middlemanId
+        ? [{ id: middlemanId, allow: userPermissions }]
+        : []),
     ],
   });
 
@@ -115,7 +125,7 @@ export const createTicket = async (client, interaction) => {
   );
 
   const msg = await channel.send({
-    content: `<@${interaction.user.id}>`,
+    content: `<@${interaction.user.id}>${middlemanId ? ` <@${middlemanId}>` : ''}`,
     embeds: [
       new EmbedBuilder()
         .setDescription('Your ticket has been created!')
@@ -165,6 +175,7 @@ export const createTicket = async (client, interaction) => {
       message: msg.id,
       status: 'open',
       claimedBy: 'none',
+      middlemanId,
     },
   );
 };

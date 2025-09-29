@@ -68,6 +68,9 @@ export default {
         });
         break;
       }
+
+      default:
+        return;
     }
 
     await interaction.reply({

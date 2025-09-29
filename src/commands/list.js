@@ -1,5 +1,6 @@
 import { SlashCommandBuilder } from 'discord.js';
 import { mainEmbed } from '../utils/embed.js';
+import { showModal } from '../utils/tickets.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -11,8 +12,33 @@ export default {
    * @param {import('discord.js').ChatInputCommandInteraction} interaction
    */
   async execute(client, interaction) {
-    await interaction.reply({
-      embeds: [mainEmbed('To be implemented!')],
-    });
+    const key = `setup_${interaction.guild.id}`;
+    const ticket = await client.db.get(key);
+
+    if (!ticket || !ticket.creatorId) {
+      return interaction.reply({
+        embeds: [
+          errorEmbed('Server has not been setup. Run /setup wizard'),
+        ],
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    await showModal(
+      interaction,
+      [
+        {
+          customId: 'username',
+          label: 'Minecraft IGN',
+          placeholder: 'Refraction',
+        },
+        {
+          customId: 'price',
+          label: 'Starting Price',
+          placeholder: '500',
+        },
+      ],
+      'create_account_listing',
+    );
   },
 };

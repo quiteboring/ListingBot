@@ -85,7 +85,7 @@ export default {
     if (interaction.isButton()) {
       await showModal(interaction, [
         {
-          customId: 'userId',
+          customId: 'user_id',
           label: 'ID of other Person',
           placeholder: 'ex: 1367543367277219840',
         },
@@ -149,17 +149,16 @@ export default {
       await interaction.reply({
         embeds: [
           errorEmbed(
-            'You do not have permissions to reopen the ticket.',
+            'You do not have permissions to close the ticket.',
           ),
         ],
         flags: MessageFlags.Ephemeral,
       });
-
       return;
     }
 
     const channel = interaction.channel;
-    const key = `ticket_${interaction.guild.id}_${interaction.channel.id}`;
+    const key = `ticket_${interaction.guild.id}_${channel.id}`;
     const ticket = await client.db.get(key);
 
     if (!ticket || !ticket.creatorId) {
@@ -175,22 +174,26 @@ export default {
       ReadMessageHistory: false,
     });
 
+    if (ticket.middlemanId) {
+      await channel.permissionOverwrites.edit(ticket.middlemanId, {
+        ViewChannel: false,
+        SendMessages: false,
+        ReadMessageHistory: false,
+      });
+    }
+
     ticket.status = 'closed';
-    const msg = await interaction.channel.messages.fetch(
-      ticket.message,
-    );
+    const msg = await channel.messages.fetch(ticket.message);
 
     await client.db.set(key, ticket);
     await interaction.deferUpdate();
-    await msg.edit({
-      components: [],
-    });
+
+    await msg.edit({ components: [] });
 
     await channel.send({
       embeds: [
         errorEmbed(`Ticket closed by <@${interaction.user.id}>`),
       ],
-
       components: [
         new ActionRowBuilder().addComponents(
           new ButtonBuilder()
@@ -223,7 +226,6 @@ export default {
         ],
         flags: MessageFlags.Ephemeral,
       });
-
       return;
     }
 
@@ -246,17 +248,25 @@ export default {
       ReadMessageHistory: true,
     });
 
+    if (ticket.middlemanId) {
+      await channel.permissionOverwrites.edit(ticket.middlemanId, {
+        ViewChannel: true,
+        SendMessages: true,
+        ReadMessageHistory: true,
+      });
+    }
+
     ticket.status = 'open';
-    await interaction.deferUpdate();
     await client.db.set(key, ticket);
+    await interaction.deferUpdate();
+
     await channel.send({
       embeds: [
         successEmbed(`Ticket reopened by <@${interaction.user.id}>`),
       ],
     });
-    await msg.edit({
-      components: [],
-    });
+
+    await msg.edit({ components: [] });
 
     await ticketMsg.edit({
       components: [

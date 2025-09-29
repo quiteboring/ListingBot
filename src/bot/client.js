@@ -49,7 +49,7 @@ export default class Bot extends Client {
 
     for (const file of commandFiles) {
       const filePath = path.join(commandsPath, file);
-      const command = await import(filePath);
+      const command = await import(`file://${filePath}`);
 
       if ('data' in command.default && 'execute' in command.default) {
         this.commands.set(command.default.data.name, command.default);
@@ -90,7 +90,7 @@ export default class Bot extends Client {
 
     for (const file of eventFiles) {
       const filePath = path.join(eventsPath, file);
-      const event = await import(filePath);
+      const event = await import(`file://${filePath}`);
 
       this.on(
         event.default.name,
