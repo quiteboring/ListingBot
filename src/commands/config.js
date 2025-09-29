@@ -1,4 +1,8 @@
-import { SlashCommandBuilder, TextInputStyle } from 'discord.js';
+import {
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+  TextInputStyle,
+} from 'discord.js';
 import { mainEmbed } from '../utils/embed.js';
 import { showModal } from '../utils/tickets.js';
 
@@ -8,6 +12,7 @@ export default {
     .setDescription(
       'User friendly way to configure details for each panel!',
     )
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand((sub) =>
       sub
         .setName('exchange')

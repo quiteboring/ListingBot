@@ -51,6 +51,7 @@ export default {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     try {
+      const emojis = (await client.db.get(`emojis_${interaction.guild.id}`)) || {};
       const __dirname = path.dirname(fileURLToPath(import.meta.url));
       const assetsPath = path.resolve(__dirname, '../../assets');
       const files = (await fs.readdir(assetsPath)).filter((f) =>
@@ -69,6 +70,9 @@ export default {
 
       let created = 0,
         updated = 0;
+      
+      await interaction.guild.emojis.fetch()
+
       for (const file of files) {
         const emojiName = path.basename(file, '.png');
         const filePath = path.join(assetsPath, file);
@@ -77,18 +81,20 @@ export default {
         );
 
         if (existing) {
-          await client.db.set(existing.name, existing.toString());
+          emojis[existing.name] = existing.toString();
           updated++;
         } else {
           const emoji = await interaction.guild.emojis.create({
             attachment: filePath,
             name: emojiName,
           });
-          await client.db.set(emoji.name, emoji.toString());
+          emojis[emoji.name] = emoji.toString();
           created++;
           await new Promise((r) => setTimeout(r, 1000));
         }
       }
+
+      await client.db.set(`emojis_${interaction.guild.id}`, emojis) 
 
       return interaction.editReply({
         embeds: [

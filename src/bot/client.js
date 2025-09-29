@@ -10,6 +10,7 @@ import { logger } from '../utils/logger.js';
 import fs from 'fs';
 import path from 'path';
 import { QuickDB } from 'quick.db';
+import * as Hypixel from 'hypixel-api-reborn';
 
 export default class Bot extends Client {
   /**
@@ -17,7 +18,7 @@ export default class Bot extends Client {
    * @param {string} clientId
    * @param {string} databaseUrl
    */
-  constructor(token, clientId, databaseUrl) {
+  constructor(token, clientId, hypixelApiKey) {
     super({
       intents: [
         GatewayIntentBits.Guilds,
@@ -28,8 +29,10 @@ export default class Bot extends Client {
     });
 
     this.token = token;
+    this.hypixelApiKey = hypixelApiKey;
     this.clientId = clientId;
 
+    this.hypixel = new Hypixel.Client(hypixelApiKey);
     this.db = new QuickDB({ filePath: 'database.sqlite' });
 
     this.commands = new Collection();

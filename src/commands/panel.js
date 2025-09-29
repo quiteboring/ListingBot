@@ -4,8 +4,10 @@ import {
   ButtonStyle,
   EmbedBuilder,
   MessageFlags,
+  PermissionFlagsBits,
   SlashCommandBuilder,
   StringSelectMenuBuilder,
+  StringSelectMenuComponent,
 } from 'discord.js';
 import { successEmbed } from '../utils/embed.js';
 import colors from '../colors.js';
@@ -14,6 +16,7 @@ export default {
   data: new SlashCommandBuilder()
     .setName('panel')
     .setDescription('Create panels for your shop!')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand((sub) =>
       sub.setName('coins').setDescription('Create a coin panel.'),
     )
@@ -53,7 +56,7 @@ export default {
         await this.sendMfaPanel(client, interaction);
         break;
       case 'sellaccount':
-        await this.sendSellAccountPanel(client, interaction);
+        await this.sendSellAccountPanel(interaction);
         break;
     }
 
@@ -164,26 +167,37 @@ export default {
   async sendMfaPanel(client, interaction) {
     const guildId = interaction.guild.id;
     const config = (await client.db.get(`config_${guildId}`)) || {};
+    const emojis = (await client.db.get(`emojis_${guildId}`)) || {};
 
     const ranks = [
-      { key: 'mfaNon', label: 'Non' },
-      { key: 'mfaVip', label: 'VIP' },
-      { key: 'mfaVipPlus', label: 'VIP+' },
-      { key: 'mfaMvp', label: 'MVP' },
-      { key: 'mfaMvpPlus', label: 'MVP+' },
+      { key: 'mfaNon', label: 'Non', emojiKey: 'non' },
+      { key: 'mfaVip', label: 'VIP', emojiKey: 'vip' },
+      { key: 'mfaVipPlus', label: 'VIP+', emojiKey: 'vip_plus' },
+      { key: 'mfaMvp', label: 'MVP', emojiKey: 'mvp' },
+      { key: 'mfaMvpPlus', label: 'MVP+', emojiKey: 'mvp_plus' },
+      {
+        key: 'mfaMvpPlusPlus',
+        label: 'MVP++',
+        emojiKey: 'mvp_plus_plus',
+      },
     ];
 
-    const availableRanks = ranks
-      .map((r) => ({
-        ...r,
-        price: config[r.key],
-      }))
-      .filter(
-        (r) =>
-          r.price !== null &&
-          r.price !== undefined &&
-          r.price !== 'none',
-      );
+    const availableRanks = await Promise.all(
+      ranks.map(async (r) => {
+        return {
+          ...r,
+          emoji: emojis?.[r.emojiKey] ?? null,
+          price: config[r.key] ?? 'none',
+        };
+      }),
+    );
+
+    const filteredRanks = availableRanks.filter(
+      (r) =>
+        r.price !== null &&
+        r.price !== undefined &&
+        r.price !== 'none',
+    );
 
     await interaction.channel.send({
       embeds: [
@@ -191,7 +205,7 @@ export default {
           {
             name: 'Available Ranks & Prices',
             value:
-              availableRanks
+              filteredRanks
                 .map((r) => `${r.label}: **$${r.price}**`)
                 .join('\n') || 'No ranks available at the moment.',
           },
@@ -204,10 +218,11 @@ export default {
               .setCustomId('mfa_ticket')
               .setPlaceholder('Choose an option...')
               .addOptions(
-                availableRanks.map((r) => ({
+                filteredRanks.map((r) => ({
                   label: r.label,
                   description: `Price: $${r.price}`,
                   value: r.key.toLowerCase(),
+                  ...(r.emoji ? { emoji: r.emoji } : {}),
                 })),
               ),
           )
@@ -215,7 +230,7 @@ export default {
     });
   },
 
-  async sendSellAccountPanel(client, interaction) {
+  async sendSellAccountPanel(interaction) {
     await interaction.channel.send({
       embeds: [this.baseEmbed('Sell Account', [])],
 
@@ -235,6 +250,7 @@ export default {
       .setTitle(`${type} Panel`)
       .setDescription('To open a ticket, press a button below.')
       .setFooter({
+        iconURL: 'https://quiteboring.dev/pfp.jpg',
         text: 'Made by Nathan | https://quiteboring.dev',
       })
       .setColor(colors.mainColor);

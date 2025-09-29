@@ -1,5 +1,5 @@
-import { SlashCommandBuilder } from 'discord.js';
-import { mainEmbed } from '../utils/embed.js';
+import { MessageFlags, SlashCommandBuilder } from 'discord.js';
+import { errorEmbed } from '../utils/embed.js';
 import { showModal } from '../utils/tickets.js';
 
 export default {
