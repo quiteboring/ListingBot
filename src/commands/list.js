@@ -1,6 +1,7 @@
 import { MessageFlags, SlashCommandBuilder } from 'discord.js';
 import { errorEmbed } from '../utils/embed.js';
 import { showModal } from '../utils/tickets.js';
+import { hasAdmin, isSeller } from '../utils/member.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -25,7 +26,7 @@ export default {
     }
 
     if (
-      !hasAdmin(interaction) ||
+      !hasAdmin(interaction) &&
       !(await isSeller(client, interaction))
     ) {
       return interaction.reply({

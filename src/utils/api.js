@@ -1,31 +1,31 @@
-import fetch from 'node-fetch';
+import axios from 'axios';
 
-// TODO: Implement caching
+const api = axios.create({
+  baseURL: 'https://api.hypixel.net/v2',
+});
 
-export async function getUUIDFromIGN(ign) {
-  const res = await fetch(
+export const getUUIDFromIGN = async (ign) => {
+  const { data } = await axios.get(
     `https://api.mojang.com/users/profiles/minecraft/${ign}`,
   );
-  if (!res.ok) throw new Error(`Player ${ign} not found`);
-  const data = await res.json();
   return data.id;
-}
+};
 
-export async function getProfileData(apiKey, uuid) {
-  const res = await fetch(
-    `https://api.hypixel.net/v2/skyblock/profiles?key=${apiKey}&uuid=${uuid}`,
+export const getProfileData = async (apiKey, uuid) => {
+  const { data } = await api.get(
+    `skyblock/profiles?key=${apiKey}&uuid=${uuid}`,
   );
-  const json = await res.json();
+  return data.profiles.find((p) => p.selected);
+};
 
-  if (!json.success) throw new Error('Failed to fetch profiles');
-
-  return json.profiles.find((profile) => profile.selected) || null;
-}
-
-export async function getMuseumData(apiKey, profileId, uuid) {
-  const res = await fetch(
-    `https://api.hypixel.net/v2/skyblock/museum?key=${apiKey}&profile=${profileId}`,
+export const getMuseumData = async (apiKey, profileId, uuid) => {
+  const { data } = await api.get(
+    `skyblock/museum?key=${apiKey}&profile=${profileId}&uuid=${uuid}`,
   );
-  const json = await res.json();
-  return json.members[uuid];
-}
+  return data;
+};
+
+export const getPlayerData = async (apiKey, uuid) => {
+  const { data } = await api.get(`player?key=${apiKey}&uuid=${uuid}`);
+  return data.player;
+};
