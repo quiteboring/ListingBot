@@ -24,6 +24,16 @@ export default {
       });
     }
 
+    if (
+      !hasAdmin(interaction) ||
+      !(await isSeller(client, interaction))
+    ) {
+      return interaction.reply({
+        embeds: [errorEmbed('You cannot use this command.')],
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
     await showModal(
       interaction,
       [

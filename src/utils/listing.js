@@ -7,6 +7,10 @@ import {
   getMuseumData,
 } from './api.js';
 
+/**
+ * @param {import("../bot/client.js").default} client
+ * @param {import("discord.js").Interaction} interaction
+ */
 export const createAccountChannel = async (
   client,
   interaction,
@@ -53,8 +57,16 @@ export const createAccountChannel = async (
 
   try {
     const uuid = await getUUIDFromIGN(username);
+    const profileData = await getProfileData(
+      client.hypixelApiKey,
+      uuid,
+    );
+    const data = await client.hypixel.getSkyBlockProfile(
+      profileData.profile_id,
+    );
+
     const networthManager = new ProfileNetworthCalculator(
-      await getProfileData(client.hypixelApiKey, uuid).members[uuid],
+      profileData.members[uuid],
       await getMuseumData(
         client.hypixelApiKey,
         profileData.profile_id,
