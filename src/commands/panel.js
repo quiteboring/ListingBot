@@ -96,7 +96,9 @@ export default {
             value: `Base Price: **$${sellPrice}/m**`,
             inline: true,
           },
-        ]),
+        ]).setDescription(
+          'To open a ticket, press a button below.\n\n**Current Stock:** 0',
+        ),
       ],
 
       components: this.singleRow(
@@ -110,6 +112,11 @@ export default {
           .setStyle(ButtonStyle.Secondary)
           .setLabel('Sell Coins')
           .setEmoji('💵'),
+        new ButtonBuilder()
+          .setCustomId('update_stock')
+          .setStyle(ButtonStyle.Secondary)
+          .setLabel('Update Stock')
+          .setEmoji('📦'),
       ),
     });
   },

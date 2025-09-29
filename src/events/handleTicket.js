@@ -10,6 +10,7 @@ import { createTicket, showModal } from '../utils/tickets.js';
 import { errorEmbed, successEmbed } from '../utils/embed.js';
 import { createTranscript } from 'discord-html-transcripts';
 import { hasAdmin, isSeller } from '../utils/member.js';
+import { editCoinPanel } from '../utils/panel.js';
 
 export default {
   name: 'interactionCreate',
@@ -27,6 +28,8 @@ export default {
       return;
 
     switch (interaction.customId) {
+      case 'update_stock':
+        return await this.updateStock(client, interaction);
       case 'sell_coins_ticket':
       case 'buy_coins_ticket':
         return await this.handleCoinsTicket(client, interaction);
@@ -57,8 +60,32 @@ export default {
   },
 
   // General Button + Modal interactions
+  async updateStock(client, interaction) {
+    if (interaction.isButton()) {
+      await showModal(interaction, [
+        {
+          customId: 'current_stock',
+          label: 'What is current stock?',
+          placeholder: '10b',
+        },
+      ]);
+    } else if (interaction.isModalSubmit()) {
+      await editCoinPanel(interaction);
+    }
+  },
+
   async handleCoinsTicket(client, interaction) {
     if (interaction.isButton()) {
+      if (
+        !hasAdmin(interaction) ||
+        !(await isSeller(client, interaction))
+      ) {
+        return interaction.reply({
+          embeds: [errorEmbed('You cannot use this feature.')],
+          flags: MessageFlags.Ephemeral,
+        });
+      }
+
       await showModal(interaction, [
         {
           customId: 'username',
