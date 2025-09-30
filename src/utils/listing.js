@@ -30,28 +30,28 @@ export const createAccountChannel = async (
     });
   }
 
-  // const channel = await interaction.guild.channels.create({
-  //   name: `💲${price}│listing-${listingIndex}`,
-  //   type: ChannelType.GuildText,
-  //   parent: category.id,
-  //   permissionOverwrites: category.permissionOverwrites.cache.map(
-  //     (po) => ({
-  //       id: po.id,
-  //       allow: po.allow.bitfield,
-  //       deny: po.deny.bitfield,
-  //     }),
-  //   ),
-  // });
+  const channel = await interaction.guild.channels.create({
+    name: `💲${price}│listing-${listingIndex}`,
+    type: ChannelType.GuildText,
+    parent: category.id,
+    permissionOverwrites: category.permissionOverwrites.cache.map(
+      (po) => ({
+        id: po.id,
+        allow: po.allow.bitfield,
+        deny: po.deny.bitfield,
+      }),
+    ),
+  });
 
-  // await client.db.set(
-  //   `listing_${interaction.guild.id}_${channel.id}`,
-  //   { username, price },
-  // );
+  await client.db.set(
+    `listing_${interaction.guild.id}_${channel.id}`,
+    { username, price },
+  );
 
-  // await client.db.set(
-  //   `listing_count_${interaction.guild.id}`,
-  //   listingIndex + 1,
-  // );
+  await client.db.set(
+    `listing_count_${interaction.guild.id}`,
+    listingIndex + 1,
+  );
 
   try {
     await interaction.deferUpdate();
@@ -61,16 +61,16 @@ export const createAccountChannel = async (
       username,
     );
 
-    // const embed = new EmbedBuilder()
-    //   .setTitle('Account Information')
-    //   .setColor(colors.mainColor)
-    //   .setThumbnail(`https://mc-heads.net/body/anonymous/left`)
-    //   .setFooter({
-    //     text: 'Username will be revealed after payment confirmation',
-    //   })
-    //   .setTimestamp();
+    const embed = new EmbedBuilder()
+      .setTitle('Account Information')
+      .setColor(colors.mainColor)
+      .setThumbnail(`https://mc-heads.net/body/anonymous/left`)
+      .setFooter({
+        text: 'Username will be revealed after payment confirmation',
+      })
+      .setTimestamp();
 
-    // await channel.send({ embeds: [embed] });
+    await channel.send({ embeds: [embed] });
   } catch (error) {
     await interaction.followUp({
       embeds: [errorEmbed('Could not fetch player data.')],
