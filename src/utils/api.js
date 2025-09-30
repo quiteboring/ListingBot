@@ -1,31 +1,21 @@
 import axios from 'axios';
+import { ProfileNetworthCalculator } from 'skyhelper-networth';
 
-const api = axios.create({
-  baseURL: 'https://api.hypixel.net/v2',
-});
+const api = axios.create({ baseURL: 'https://api.hypixel.net/v2' });
 
-export const getUUIDFromIGN = async (ign) => {
-  const { data } = await axios.get(
-    `https://api.mojang.com/users/profiles/minecraft/${ign}`,
+export const getNetworth = async (apiKey, ign) => {
+  const { data: { id: uuid } } = await axios.get(`https://api.mojang.com/users/profiles/minecraft/${ign}`);
+  const { data: { profiles } } = await api.get(`skyblock/profiles?key=${apiKey}&uuid=${uuid}`);
+  
+  const profile = profiles.find(p => p.selected);
+
+  const { data: museumData } = await api.get(`skyblock/museum?key=${apiKey}&profile=${profile.profile_id}&uuid=${uuid}`);
+
+  const networthCalc = new ProfileNetworthCalculator(
+    profile.members[uuid],
+    museumData,
+    profile.banking?.balance ?? 0
   );
-  return data.id;
-};
 
-export const getProfileData = async (apiKey, uuid) => {
-  const { data } = await api.get(
-    `skyblock/profiles?key=${apiKey}&uuid=${uuid}`,
-  );
-  return data.profiles.find((p) => p.selected);
-};
-
-export const getMuseumData = async (apiKey, profileId, uuid) => {
-  const { data } = await api.get(
-    `skyblock/museum?key=${apiKey}&profile=${profileId}&uuid=${uuid}`,
-  );
-  return data;
-};
-
-export const getPlayerData = async (apiKey, uuid) => {
-  const { data } = await api.get(`player?key=${apiKey}&uuid=${uuid}`);
-  return data.player;
+  return await networthCalc.getNetworth({ onlyNetworth: true });
 };

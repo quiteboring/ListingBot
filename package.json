@@ -19,12 +19,12 @@
     "format": "prettier --write \"src/**/*.js\""
   },
   "dependencies": {
+    "axios": "^1.12.2",
     "better-sqlite3": "^12.4.1",
     "discord-html-transcripts": "^3.2.0",
     "discord.js": "^14.22.1",
     "dotenv": "^17.2.2",
     "hypixel-api-reborn": "^12.0.0-12",
-    "node-fetch": "^3.3.2",
     "quick.db": "^9.1.7",
     "skyhelper-networth": "^2.4.3"
   },
