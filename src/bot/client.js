@@ -1,10 +1,10 @@
 import {
-  Client,
   Collection,
   GatewayIntentBits,
   REST,
   Routes,
 } from 'discord.js';
+import * as Discord from 'discord.js';
 import { fileURLToPath } from 'url';
 import { logger } from '../utils/logger.js';
 import fs from 'fs';
@@ -12,7 +12,7 @@ import path from 'path';
 import { QuickDB } from 'quick.db';
 import * as Hypixel from 'hypixel-api-reborn';
 
-export default class Bot extends Client {
+export default class Bot extends Discord.Client {
   /**
    * @param {string} token
    * @param {string} clientId
@@ -32,7 +32,7 @@ export default class Bot extends Client {
     this.hypixelApiKey = hypixelApiKey;
     this.clientId = clientId;
 
-    this.hypixel = new Hypixel.Client(hypixelApiKey);
+    this.api = new Hypixel.Client(hypixelApiKey);
     this.db = new QuickDB({ filePath: 'database.sqlite' });
 
     this.commands = new Collection();

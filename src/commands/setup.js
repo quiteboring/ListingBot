@@ -51,8 +51,7 @@ export default {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     try {
-      const emojis =
-        (await client.db.get(`emojis_${interaction.guild.id}`)) || {};
+      const emojis = (await client.db.get('emojis')) || {};
       const __dirname = path.dirname(fileURLToPath(import.meta.url));
       const assetsPath = path.resolve(__dirname, '../../assets');
       const files = (await fs.readdir(assetsPath)).filter((f) =>
@@ -95,7 +94,7 @@ export default {
         }
       }
 
-      await client.db.set(`emojis_${interaction.guild.id}`, emojis);
+      await client.db.set('emojis', emojis);
 
       return interaction.editReply({
         embeds: [

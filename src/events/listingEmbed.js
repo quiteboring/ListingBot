@@ -1,4 +1,7 @@
-import { createAccountChannel } from '../utils/listing.js';
+import {
+  createAccountChannel,
+  createAccountTicket,
+} from '../utils/listing.js';
 
 export default {
   name: 'interactionCreate',
@@ -8,7 +11,6 @@ export default {
    * @param {import("discord.js").Interaction} interaction
    */
   async execute(client, interaction) {
-    // For the intial listing command
     if (
       interaction.isModalSubmit() &&
       interaction.customId == 'create_account_listing'
@@ -25,9 +27,11 @@ export default {
       );
     }
 
-    // For the actual account embed
-    if (interaction.isButton()) {
-    } else if (interaction.isStringSelectMenu()) {
+    if (
+      interaction.isButton() &&
+      interaction.customId.startsWith('buy_account')
+    ) {
+      await createAccountTicket(client, interaction);
     }
   },
 };

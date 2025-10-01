@@ -9,8 +9,6 @@ import {
   MessageFlags,
   PermissionsBitField,
   ChannelType,
-  User,
-  ModalSubmitFields,
 } from 'discord.js';
 import { errorEmbed } from './embed.js';
 import colors from '../colors.js';
@@ -41,10 +39,6 @@ export const showModal = async (interaction, options, id) => {
   await interaction.showModal(modal);
 };
 
-/**
- * @param {import("../bot/client").default} client
- * @param {import("discord.js").Interaction} interaction
- */
 export const createTicket = async (client, interaction) => {
   const setup = await client.db.get(`setup_${interaction.guild.id}`);
   const rawIndex =

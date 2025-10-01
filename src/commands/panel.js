@@ -174,7 +174,7 @@ export default {
   async sendMfaPanel(client, interaction) {
     const guildId = interaction.guild.id;
     const config = (await client.db.get(`config_${guildId}`)) || {};
-    const emojis = (await client.db.get(`emojis_${guildId}`)) || {};
+    const emojis = (await client.db.get(`emojis`)) || {};
 
     const ranks = [
       { key: 'mfaNon', label: 'Non', emojiKey: 'non' },

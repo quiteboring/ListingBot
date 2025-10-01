@@ -1,21 +1,31 @@
-import axios from 'axios';
-import { ProfileNetworthCalculator } from 'skyhelper-networth';
+const cache = new Map();
+const CACHE_TTL = 30 * 1000;
 
-const api = axios.create({ baseURL: 'https://api.hypixel.net/v2' });
+/**
+ * Fetches SkyBlock data with caching.
+ *
+ * @param {import("../bot/client.js").default} client
+ * @param {string} apiKey
+ * @param {string} ign
+ */
+export const getData = async (client, apiKey, ign) => {
+  const now = Date.now();
+  const cached = cache.get(ign);
 
-export const getNetworth = async (apiKey, ign) => {
-  const { data: { id: uuid } } = await axios.get(`https://api.mojang.com/users/profiles/minecraft/${ign}`);
-  const { data: { profiles } } = await api.get(`skyblock/profiles?key=${apiKey}&uuid=${uuid}`);
-  
-  const profile = profiles.find(p => p.selected);
+  if (cache.has(ign) && now - cached.timestamp < CACHE_TTL) {
+    return cached.data;
+  }
 
-  const { data: museumData } = await api.get(`skyblock/museum?key=${apiKey}&profile=${profile.profile_id}&uuid=${uuid}`);
+  const profs = await client.api.getSkyblockProfiles(ign);
+  const prof = profs.find((p) => p.selected);
 
-  const networthCalc = new ProfileNetworthCalculator(
-    profile.members[uuid],
-    museumData,
-    profile.banking?.balance ?? 0
-  );
+  const data = {
+    profile: prof,
+    networth: await prof.me.getNetworth({ onlyNetworth: true }),
+    hyacc: await client.api.getPlayer(ign),
+    garden: await client.api.getSkyblockGarden(prof.profileId),
+  };
 
-  return await networthCalc.getNetworth({ onlyNetworth: true });
+  cache.set(ign, { data, timestamp: now });
+  return data;
 };
