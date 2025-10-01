@@ -19,9 +19,7 @@ export default {
         .setDescription('Set exchange panel details.'),
     )
     .addSubcommand((sub) =>
-      sub
-        .setName('tos')
-        .setDescription('Edit the terms of service.'),
+      sub.setName('tos').setDescription('Edit the terms of service.'),
     )
     .addSubcommand((sub) =>
       sub.setName('coins').setDescription('Set coin prices.'),
