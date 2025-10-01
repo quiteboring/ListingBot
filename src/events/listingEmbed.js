@@ -1,6 +1,7 @@
 import {
   createAccountChannel,
   createAccountTicket,
+  unlistAccount,
 } from '../utils/listing.js';
 
 export default {
@@ -27,11 +28,18 @@ export default {
       );
     }
 
-    if (
-      interaction.isButton() &&
-      interaction.customId.startsWith('buy_account')
-    ) {
-      await createAccountTicket(client, interaction);
+    if (interaction.isButton()) {
+      const id = interaction.customId;
+
+      if (id.startsWith('buy_account')) {
+        await createAccountTicket(client, interaction);
+      } else if (id.startsWith('unlist_account')) {
+        await unlistAccount(
+          client,
+          interaction,
+          interaction.channel.id,
+        );
+      }
     }
   },
 };

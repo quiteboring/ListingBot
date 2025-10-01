@@ -4,7 +4,9 @@ import {
   ButtonStyle,
   Guild,
   MessageFlags,
+  StringSelectMenuOptionBuilder,
   TextChannel,
+  TextInputStyle,
 } from 'discord.js';
 import { createTicket, showModal } from '../utils/tickets.js';
 import { errorEmbed, successEmbed } from '../utils/embed.js';
@@ -119,6 +121,7 @@ export default {
         {
           customId: 'details',
           label: 'Details',
+          style: TextInputStyle.Paragraph,
           placeholder: 'Type here...',
         },
       ]);

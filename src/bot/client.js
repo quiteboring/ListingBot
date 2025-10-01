@@ -18,7 +18,7 @@ export default class Bot extends Discord.Client {
    * @param {string} clientId
    * @param {string} databaseUrl
    */
-  constructor(token, clientId, hypixelApiKey) {
+  constructor(token, clientId, hypixelApiKey, ownerId) {
     super({
       intents: [
         GatewayIntentBits.Guilds,
@@ -31,6 +31,7 @@ export default class Bot extends Discord.Client {
     this.token = token;
     this.hypixelApiKey = hypixelApiKey;
     this.clientId = clientId;
+    this.ownerId = ownerId;
 
     this.api = new Hypixel.Client(hypixelApiKey);
     this.db = new QuickDB({ filePath: 'database.sqlite' });

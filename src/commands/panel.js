@@ -73,10 +73,10 @@ export default {
   async sendCoinPanel(client, interaction) {
     const buyPrice =
       (await client.db.get(`config_${interaction.guild.id}`))
-        .coinBuyPrice || 'unknown';
+        ?.coinBuyPrice || 'unknown';
     const sellPrice =
       (await client.db.get(`config_${interaction.guild.id}`))
-        .coinSellPrice || 'unknown';
+        ?.coinSellPrice || 'unknown';
 
     await interaction.channel.send({
       embeds: [
@@ -124,7 +124,7 @@ export default {
   async sendMiddlemanPanel(client, interaction) {
     const details =
       (await client.db.get(`config_${interaction.guild.id}`))
-        .middlemanDetails || 'No Details Provided';
+        ?.middlemanDetails || 'No Details Provided';
 
     await interaction.channel.send({
       embeds: [
@@ -149,7 +149,7 @@ export default {
   async sendExchangePanel(client, interaction) {
     const details =
       (await client.db.get(`config_${interaction.guild.id}`))
-        .exchangeDetails || 'No Details Provided';
+        ?.exchangeDetails || 'No Details Provided';
 
     await interaction.channel.send({
       embeds: [
@@ -201,9 +201,7 @@ export default {
 
     const filteredRanks = availableRanks.filter(
       (r) =>
-        r.price !== null &&
-        r.price !== undefined &&
-        r.price !== 'none',
+        r.price != null && r.price != undefined && r.price != 'none',
     );
 
     await interaction.channel.send({
@@ -219,7 +217,7 @@ export default {
         ]),
       ],
 
-      components: availableRanks.length
+      components: filteredRanks.length
         ? this.singleRow(
             new StringSelectMenuBuilder()
               .setCustomId('mfa_ticket')

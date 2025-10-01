@@ -62,15 +62,29 @@ export const createTicket = async (client, interaction) => {
   if (interaction.isModalSubmit()) {
     fields = interaction.fields.fields.map((input, key) => ({
       name: key
+        .replace('_id', '')
         .replace(/_/g, ' ')
         .replace(/\b\w/g, (c) => c.toUpperCase()),
-      value: input.value || 'N/A',
+      value: key.includes('user_id')
+        ? `<@${input.value}>` || 'N/A'
+        : input.value || 'N/A',
     }));
 
     if (interaction.fields.fields.has('user_id')) {
-      const value = interaction.fields.getTextInputValue('user_id');
-      const user = await interaction.guild.members.fetch(value);
-      middlemanId = user.id;
+      try {
+        const value = interaction.fields.getTextInputValue('user_id');
+        const user = await interaction.guild.members.fetch(value);
+        middlemanId = user.id;
+      } catch (error) {
+        return await interaction.reply({
+          embeds: [
+            errorEmbed(
+              'Invalid user ID provided or the user is not in this server.',
+            ),
+          ],
+          flags: MessageFlags.Ephemeral,
+        });
+      }
     }
   } else if (interaction.isStringSelectMenu()) {
     fields = [
@@ -162,6 +176,7 @@ export const createTicket = async (client, interaction) => {
     ],
   });
 
+  await msg.pin();
   await client.db.set(
     `ticket_${interaction.guild.id}_${channel.id}`,
     {

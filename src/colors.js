@@ -1,5 +1,5 @@
 export default {
-  mainColor: '#3B82F6',
+  mainColor: '#09AF5F',
   successColor: '#57F287',
   infoColor: '#FEE75C',
   errorColor: '#ED4245',

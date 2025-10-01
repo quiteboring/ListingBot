@@ -8,7 +8,7 @@ import {
   PermissionsBitField,
 } from 'discord.js';
 import colors from '../colors.js';
-import { errorEmbed } from './embed.js';
+import { errorEmbed, successEmbed } from './embed.js';
 import { getData } from './api.js';
 import {
   getDungeonData,
@@ -21,6 +21,7 @@ import {
   getSkillAverage,
   getSlayerData,
 } from './account.js';
+import { hasAdmin, isSeller } from './member.js';
 
 export const createAccountChannel = async (
   client,
@@ -43,6 +44,18 @@ export const createAccountChannel = async (
     });
   }
 
+  if (isNaN(parseFloat(price))) {
+    return await interaction.reply({
+      embeds: [
+        errorEmbed(
+          'Invalid input. Please provide a valid number for the prices.',
+        ),
+      ],
+
+      flags: MessageFlags.Ephemeral,
+    });
+  }
+
   const channel = await interaction.guild.channels.create({
     name: `💲${price}│listing-${listingIndex}`,
     type: ChannelType.GuildText,
@@ -57,11 +70,6 @@ export const createAccountChannel = async (
   });
 
   await client.db.set(
-    `listing_${interaction.guild.id}_${channel.id}`,
-    { username, price },
-  );
-
-  await client.db.set(
     `listing_count_${interaction.guild.id}`,
     listingIndex + 1,
   );
@@ -71,11 +79,17 @@ export const createAccountChannel = async (
 
     const spacer = { name: '\u200B', value: '\u200B', inline: true };
     const emojis = (await client.db.get('emojis')) || {};
-    const { hyacc, profile, networth, garden, minions } = await getData(
-      client,
-      client.hypixelApiKey,
-      username,
-    );
+    const methods =
+      (await client.db.get(
+        `payment_methods_${interaction.user.id}`,
+      )) || 'None Provided';
+
+    const { hyacc, profile, networth, garden, minions } =
+      await getData(client, client.hypixelApiKey, username);
+
+    function getEmoji(name) {
+      return emojis[name] ? emojis[name] + ' ' : '';
+    }
 
     const embed = new EmbedBuilder()
       .setTitle('Account Information')
@@ -87,50 +101,59 @@ export const createAccountChannel = async (
           value: getRank(emojis, hyacc),
           inline: false,
         },
-
         {
-          name: 'SB Level',
+          name: `${getEmoji('sblevel')}SB Level`,
           value: getSBLevel(profile),
           inline: true,
         },
         {
-          name: 'Skill Average',
+          name: `${getEmoji('foraging')}Skill Average`,
           value: getSkillAverage(profile),
           inline: true,
         },
         {
-          name: 'Slayer',
+          name: `${getEmoji('maddox_batphone')}Slayer`,
           value: getSlayerData(profile),
           inline: true,
         },
 
         {
-          name: 'Networth',
+          name: `${getEmoji('bank')}Networth`,
           value: getNetworthData(networth),
           inline: true,
         },
         {
-          name: 'Garden',
+          name: `${getEmoji('garden')}Garden`,
           value: getGardenData(garden),
           inline: true,
         },
         {
-          name: 'Dungeons',
+          name: `${getEmoji('dungeon_skull')}Dungeons`,
           value: getDungeonData(profile),
           inline: true,
         },
 
         {
-          name: 'Mining',
+          name: `${getEmoji('pickaxe')}Mining`,
           value: getMiningData(profile),
           inline: true,
         },
         {
-          name: 'Minions',
+          name: `${getEmoji('cobblestone_minion')}Minions`,
           value: getMinionData(minions),
           inline: true,
         },
         spacer,
+        {
+          name: `💰 Price`,
+          value: `$${price}`,
+          inline: true,
+        },
+        {
+          name: `💳 Payment Method(s)`,
+          value: methods,
+          inline: true,
+        },
       ])
       .setFooter({
         iconURL: interaction.member.displayAvatarURL(),
@@ -157,12 +180,14 @@ export const createAccountChannel = async (
             .setCustomId(`buy_account_${channel.id}`)
             .setStyle(ButtonStyle.Secondary)
             .setEmoji('💸'),
+          new ButtonBuilder()
+            .setLabel('Unlist')
+            .setCustomId(`unlist_account_${channel.id}`)
+            .setStyle(ButtonStyle.Danger),
         ),
       ],
     });
   } catch (error) {
-    console.log(error);
-
     await interaction.followUp({
       embeds: [errorEmbed('Could not fetch player data.')],
       flags: MessageFlags.Ephemeral,
@@ -264,6 +289,7 @@ export const createAccountTicket = async (client, interaction) => {
     ],
   });
 
+  await msg.pin();
   await client.db.set(
     `ticket_${interaction.guild.id}_${channel.id}`,
     {
@@ -274,4 +300,68 @@ export const createAccountTicket = async (client, interaction) => {
       middlemanId: null,
     },
   );
+};
+
+export const unlistAccount = async (
+  client,
+  interaction,
+  channelId,
+) => {
+  const key = `setup_${interaction.guild.id}`;
+  const ticket = await client.db.get(key);
+
+  if (!ticket || !ticket.creatorId) {
+    return interaction.reply({
+      embeds: [
+        errorEmbed('Server has not been setup. Run /setup wizard'),
+      ],
+      flags: MessageFlags.Ephemeral,
+    });
+  }
+
+  if (
+    !hasAdmin(interaction) &&
+    !(await isSeller(client, interaction))
+  ) {
+    return interaction.reply({
+      embeds: [errorEmbed('You cannot unlist this account.')],
+      flags: MessageFlags.Ephemeral,
+    });
+  }
+
+  const listings =
+    (await client.db.get(`accounts_${interaction.guild.id}`)) || [];
+
+  const exists = listings.some(
+    (listing) => listing.channel === channelId,
+  );
+
+  if (!exists) {
+    return interaction.reply({
+      embeds: [errorEmbed('No account found.')],
+      flags: MessageFlags.Ephemeral,
+    });
+  }
+
+  const updatedListings = listings.filter(
+    (listing) => listing.channel !== channelId,
+  );
+
+  await client.db.set(
+    `accounts_${interaction.guild.id}`,
+    updatedListings,
+  );
+
+  const channel = await interaction.guild.channels.fetch(channelId);
+
+  setTimeout(async () => {
+    if (channel) {
+      await channel.delete();
+    }
+  }, 3000);
+
+  await interaction.reply({
+    embeds: [successEmbed('Unlisting account in 3 seconds...')],
+    flags: MessageFlags.Ephemeral,
+  });
 };

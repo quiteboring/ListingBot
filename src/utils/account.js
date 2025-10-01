@@ -25,9 +25,15 @@ export const getSkillAverage = (profile) => {
   return profile.me.skills.average.toFixed(2).toString();
 };
 
-export const getMinionData = (apiKey) => {
-    return `No Minion Data`
-}
+export const getMinionData = (minions) => {
+  if (!minions) return 'No Minion Data';
+
+  const totalSlots = `**Total Slots:** ${minions.total}`;
+  const craftedSlots = `**Crafted Slots:** ${minions.crafted} (**${minions.untilNext}** until next)`;
+  const bonusSlots = `**Bonus Slots:** ${minions.community}`;
+
+  return `${totalSlots}\n${craftedSlots}\n${bonusSlots}`;
+};
 
 export const getGardenData = (garden) => {
   if (!garden) return 'No Garden Data';
@@ -45,7 +51,7 @@ export const getGardenData = (garden) => {
       ).toFixed(2)
     : '0';
 
-  return `**Level:** ${level}\n**Crop Milestone Avg:** ${average}`;
+  return `**Level:** ${level}\n**MS Avg:** ${average}`;
 };
 
 export const getDungeonData = (profile) => {
@@ -98,7 +104,10 @@ export const getRank = (emojis, hyacc) => {
     return formatted;
   }
 
-  return emojis[normalizeRank(hyacc.rank)].toString();
+  return (
+    emojis[normalizeRank(hyacc.rank) + '1'] +
+    emojis[normalizeRank(hyacc.rank) + '2']
+  );
 };
 
 export const getNetworthData = (nw) => {

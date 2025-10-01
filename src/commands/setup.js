@@ -48,6 +48,17 @@ export default {
   },
 
   async handleEmojis(client, interaction) {
+    if (interaction.member.id != client.ownerId) {
+      return await interaction.reply({
+        embeds: [
+          errorEmbed(
+            'Only the owner of this bot can use this subcommand.',
+          ),
+        ],
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     try {

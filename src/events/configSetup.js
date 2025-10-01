@@ -28,6 +28,18 @@ export default {
         const buy = interaction.fields.getTextInputValue('buy_price');
         const sell =
           interaction.fields.getTextInputValue('sell_price');
+
+        if (isNaN(parseFloat(buy)) || isNaN(parseFloat(sell))) {
+          return await interaction.reply({
+            embeds: [
+              errorEmbed(
+                'Invalid input. Please provide a valid number for the prices.',
+              ),
+            ],
+            flags: MessageFlags.Ephemeral,
+          });
+        }
+
         await client.db.set(dbKey, {
           ...currentConfig,
           coinBuyPrice: buy,

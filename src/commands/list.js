@@ -1,7 +1,13 @@
-import { MessageFlags, SlashCommandBuilder } from 'discord.js';
+import {
+  ActionRowBuilder,
+  MessageFlags,
+  SlashCommandBuilder,
+  StringSelectMenuBuilder,
+} from 'discord.js';
 import { errorEmbed, successEmbed } from '../utils/embed.js';
 import { showModal } from '../utils/tickets.js';
 import { hasAdmin, isSeller } from '../utils/member.js';
+import { unlistAccount } from '../utils/listing.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -31,14 +37,6 @@ export default {
    */
   async execute(client, interaction) {
     const sub = interaction.options.getSubcommand();
-
-    if (sub == 'create')
-      return await this.createAccount(client, interaction);
-    if (sub == 'delete')
-      return await this.deleteAccount(client, interaction);
-  },
-
-  async createAccount(client, interaction) {
     const key = `setup_${interaction.guild.id}`;
     const ticket = await client.db.get(key);
 
@@ -61,6 +59,12 @@ export default {
       });
     }
 
+    if (sub == 'create') return await this.createAccount(interaction);
+    if (sub == 'delete')
+      return await this.deleteAccount(client, interaction);
+  },
+
+  async createAccount(interaction) {
     await showModal(
       interaction,
       [
@@ -80,34 +84,7 @@ export default {
   },
 
   async deleteAccount(client, interaction) {
-    const listings =
-      (await client.db.get(`accounts_${interaction.guild.id}`)) || [];
-
     const channel = interaction.options.getChannel('channel');
-
-    const exists = listings.some(
-      (listing) => listing.channel === channel.id,
-    );
-
-    if (!exists) {
-      return interaction.reply({
-        embeds: [errorEmbed('No account found.')],
-        flags: MessageFlags.Ephemeral,
-      });
-    }
-
-    const updatedListings = listings.filter(
-      (listing) => listing.channel !== channel.id,
-    );
-
-    await client.db.set(
-      `accounts_${interaction.guild.id}`,
-      updatedListings,
-    );
-
-    return interaction.reply({
-      embeds: [successEmbed('No account found.')],
-      flags: MessageFlags.Ephemeral,
-    });
+    await unlistAccount(client, interaction, channel.id);
   },
 };
