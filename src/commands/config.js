@@ -19,6 +19,11 @@ export default {
         .setDescription('Set exchange panel details.'),
     )
     .addSubcommand((sub) =>
+      sub
+        .setName('tos')
+        .setDescription('Edit the terms of service.'),
+    )
+    .addSubcommand((sub) =>
       sub.setName('coins').setDescription('Set coin prices.'),
     )
     .addSubcommand((sub) =>
@@ -50,6 +55,19 @@ export default {
             },
           ],
           'exchange_panel_config',
+        );
+      case 'tos':
+        return await showModal(
+          interaction,
+          [
+            {
+              customId: 'details',
+              label: 'Terms of Service',
+              style: TextInputStyle.Paragraph,
+              placeholder: 'Type here...',
+            },
+          ],
+          'terms_config',
         );
       case 'coins':
         return await showModal(

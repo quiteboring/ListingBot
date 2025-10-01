@@ -24,6 +24,16 @@ export default {
         break;
       }
 
+      case 'terms_config': {
+        const details =
+          interaction.fields.getTextInputValue('details');
+        await client.db.set(dbKey, {
+          ...currentConfig,
+          tos: details,
+        });
+        break;
+      }
+
       case 'coins_panel_config': {
         const buy = interaction.fields.getTextInputValue('buy_price');
         const sell =

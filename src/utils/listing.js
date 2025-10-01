@@ -290,6 +290,23 @@ export const createAccountTicket = async (client, interaction) => {
   });
 
   await msg.pin();
+
+  const commands = await client.application.commands.fetch();
+  const termsCommand = commands.find((c) => c.name === 'tos');
+
+  await channel.send({
+    embeds: [
+      mainEmbed(
+        `We require you to agree to our Terms of Service before you can buy something.
+Refer to ${
+          termsCommand
+            ? `</tos view:${termsCommand.id}>`
+            : 'with `/tos view`'
+        }`,
+      ),
+    ],
+  });
+
   await client.db.set(
     `ticket_${interaction.guild.id}_${channel.id}`,
     {
