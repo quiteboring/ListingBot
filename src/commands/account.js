@@ -18,6 +18,7 @@ import { getSkillAverage, getSkills } from '../api/stats/skills.js';
 import { getDungeons } from '../api/stats/dungeons.js';
 import colors from '../colors.js';
 import { getSBLevel } from '../api/stats/player.js';
+import { formatNumber } from '../utils/format.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -86,7 +87,7 @@ export default {
               const coins = (
                 (networth.purse ?? 0) + (networth.bank ?? 0)
               ).toFixed(2);
-              return `**Total:** ${totalNetworth}\n**Unsoulbound:** ${unsoulboundNetworth}\n**Coins:** ${coins}`;
+              return `**Total:** ${formatNumber(totalNetworth)}\n**Unsoulbound:** ${formatNumber(unsoulboundNetworth)}\n**Coins:** ${formatNumber(coins)}`;
             })(),
             inline: true,
           },
@@ -127,7 +128,7 @@ export default {
               const mithril = powder.mithril?.total ?? 0;
               const gemstone = powder.gemstone?.total ?? 0;
               const glacite = powder.glacite?.total ?? 0;
-              return `**HOTM Level:** ${level}\n**Mithril Powder:** ${mithril}\n**Gemstone Powder:** ${gemstone}\n**Glacite Powder:** ${glacite}`;
+              return `**HOTM Level:** ${level}\n**Mithril Powder:** ${formatNumber(mithril)}\n**Gemstone Powder:** ${formatNumber(gemstone)}\n**Glacite Powder:** ${formatNumber(glacite)}`;
             })(),
             inline: true,
           },
