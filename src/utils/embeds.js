@@ -1,10 +1,10 @@
-import config from '../colors.js';
+import colors from '../colors.js';
 import { EmbedBuilder } from 'discord.js';
 
 export const mainEmbed = (title) => {
   const embed = new EmbedBuilder()
     .setDescription(title)
-    .setColor(config.mainColor);
+    .setColor(colors.mainColor);
 
   return embed;
 };
@@ -12,7 +12,7 @@ export const mainEmbed = (title) => {
 export const successEmbed = (title) => {
   const embed = new EmbedBuilder()
     .setDescription(title)
-    .setColor(config.successColor);
+    .setColor(colors.successColor);
 
   return embed;
 };
@@ -20,7 +20,7 @@ export const successEmbed = (title) => {
 export const infoEmbed = (title) => {
   const embed = new EmbedBuilder()
     .setDescription(title)
-    .setColor(config.infoColor);
+    .setColor(colors.infoColor);
 
   return embed;
 };
@@ -28,7 +28,7 @@ export const infoEmbed = (title) => {
 export const errorEmbed = (title) => {
   const embed = new EmbedBuilder()
     .setDescription(title)
-    .setColor(config.errorColor);
+    .setColor(colors.errorColor);
 
   return embed;
 };

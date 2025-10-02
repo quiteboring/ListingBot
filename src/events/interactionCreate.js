@@ -22,6 +22,7 @@ export default {
         flags: MessageFlags.Ephemeral,
       };
 
+      console.log(error);
       logger.error(error);
 
       if (interaction.deferred) {
