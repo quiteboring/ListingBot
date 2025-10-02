@@ -33,23 +33,48 @@ export const getSkills = (profile, profileData) => {
   return skills;
 };
 
-export const getSkillAverage = (profileData, hypixelPlayer, options = { decimals: 2, progress: false, cosmetic: false }) => {
-  const skillLevelCaps = getSkillLevelCaps(profileData, hypixelPlayer);
+export const getSkillAverage = (
+  profileData,
+  hypixelPlayer,
+  options = { decimals: 2, progress: false, cosmetic: false },
+) => {
+  const skillLevelCaps = getSkillLevelCaps(
+    profileData,
+    hypixelPlayer,
+  );
   let totalLevel = 0;
 
   for (const skillId of skillTables.skills) {
-    if (!options.cosmetic && skillTables.cosmeticSkills.includes(skillId)) {
+    if (
+      !options.cosmetic &&
+      skillTables.cosmeticSkills.includes(skillId)
+    ) {
       continue;
     }
 
-    const skill = getLevelByXp(profileData.player_data?.experience?.[`SKILL_${skillId.toUpperCase()}`], {
-      type: skillId,
-      cap: skillLevelCaps[skillId]
-    });
+    const skill = getLevelByXp(
+      profileData.player_data?.experience?.[
+        `SKILL_${skillId.toUpperCase()}`
+      ],
+      {
+        type: skillId,
+        cap: skillLevelCaps[skillId],
+      },
+    );
 
-    totalLevel += options.progress ? skill.levelWithProgress : skill.level;
+    totalLevel += options.progress
+      ? skill.levelWithProgress
+      : skill.level;
   }
 
-  const average = totalLevel / skillTables.skills.filter((skill) => !(!options.cosmetic && skillTables.cosmeticSkills.includes(skill))).length;
+  const average =
+    totalLevel /
+    skillTables.skills.filter(
+      (skill) =>
+        !(
+          !options.cosmetic &&
+          skillTables.cosmeticSkills.includes(skill)
+        ),
+    ).length;
   return average.toFixed(options.decimals);
-}
+};

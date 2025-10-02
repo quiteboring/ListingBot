@@ -12,11 +12,12 @@ import { getNetworth } from '../api/functions/getNetworth.js';
 import { getGarden } from '../api/stats/garden.js';
 import { getProfileData } from '../api/functions/getProfileData.js';
 import { getGardenData } from '../api/functions/getGardenData.js';
-import colors from '../colors.js';
 import { getSlayer } from '../api/stats/slayer.js';
 import { getMining } from '../api/stats/mining.js';
 import { getSkillAverage, getSkills } from '../api/stats/skills.js';
 import { getDungeons } from '../api/stats/dungeons.js';
+import colors from '../colors.js';
+import { getSBLevel } from '../api/stats/player.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -44,20 +45,106 @@ export default {
       );
 
       const garden = getGarden(gardenData);
-      const minionData = getMinionData(profile);
+      const minions = getMinionData(profile);
 
       const member = getMember(profile, uuid);
-      const slayers = getSlayer(member);
       const mining = getMining(member);
       const dungeons = getDungeons(member);
-      const skills = getSkills(member, profile);
-      const skillAvg = getSkillAverage(member, profile);
       const networth = await getNetworth(profile, member, museumData);
 
       const embed = new EmbedBuilder()
         .setTitle('Account Information')
         .setThumbnail(`https://mc-heads.net/body/anonymous/left`)
-        .setColor(colors.mainColor);
+        .setFields([
+          {
+            name: 'SB Level',
+            value: getSBLevel(member).toString(),
+            inline: true,
+          },
+          {
+            name: 'Skill Average',
+            value: getSkillAverage(member, profile).toString(),
+            inline: true,
+          },
+          {
+            name: 'Slayer',
+            value: Object.values(getSlayer(member))
+              .map((slayer) => slayer.level)
+              .join('/'),
+            inline: true,
+          },
+          {
+            name: 'Networth',
+            value: (() => {
+              if (!networth) return 'No Networth Data';
+              const totalNetworth = (networth.networth ?? 0).toFixed(
+                2,
+              );
+              const unsoulboundNetworth = (
+                networth.unsoulboundNetworth ?? 0
+              ).toFixed(2);
+              const coins = (
+                (networth.purse ?? 0) + (networth.bank ?? 0)
+              ).toFixed(2);
+              return `**Total:** ${totalNetworth}\n**Unsoulbound:** ${unsoulboundNetworth}\n**Coins:** ${coins}`;
+            })(),
+            inline: true,
+          },
+          {
+            name: 'Garden',
+            value: (() => {
+              if (!garden) return 'No Garden Data';
+              const level = garden.level.level ?? 0;
+
+              const milestoneLevels = Object.values(
+                garden.cropMilestones ?? {},
+              ).map((crop) => crop.level ?? 0);
+
+              const average = milestoneLevels.length
+                ? (
+                    milestoneLevels.reduce(
+                      (sum, val) => sum + val,
+                      0,
+                    ) / milestoneLevels.length
+                  ).toFixed(2)
+                : '0';
+
+              return `**Level:** ${level.toFixed(2)}\n**MS Avg:** ${average}`;
+            })(),
+            inline: true,
+          },
+          {
+            name: 'Dungeons',
+            value: `**Catacombs:** ${dungeons.dungeons.level.toFixed(2)}\n**Class Avg:** ${dungeons.classAverage.toFixed(2)}`,
+            inline: true,
+          },
+          {
+            name: 'Mining',
+            value: (() => {
+              if (!mining) return 'No Mining Data';
+              const level = mining.level?.level ?? 0;
+              const powder = mining.powder ?? {};
+              const mithril = powder.mithril?.total ?? 0;
+              const gemstone = powder.gemstone?.total ?? 0;
+              const glacite = powder.glacite?.total ?? 0;
+              return `**HOTM Level:** ${level}\n**Mithril Powder:** ${mithril}\n**Gemstone Powder:** ${gemstone}\n**Glacite Powder:** ${glacite}`;
+            })(),
+            inline: true,
+          },
+          {
+            name: 'Minions',
+            value: minions
+              ? `**Total Slots:** ${minions.total}\n**Crafted Slots:** ${minions.crafted} (**${minions.untilNext}** until next)\n**Bonus Slots:** ${minions.community}/5`
+              : 'No Minion Data',
+            inline: true,
+          },
+        ])
+        .setColor(colors.mainColor)
+        .setFooter({
+          iconURL: interaction.member.displayAvatarURL(),
+          text: `Listed by ${interaction.member.displayName}`,
+        })
+        .setTimestamp();
 
       await interaction.reply({
         embeds: [embed],

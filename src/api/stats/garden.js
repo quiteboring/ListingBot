@@ -9,7 +9,7 @@ export const getGarden = (garden) => {
     return {
       level: getLevelByXp(garden.garden_experience),
 
-      cropMilesstone: {
+      cropMilestones: {
         wheat: getLevelByXp(garden.resources_collected?.WHEAT, {
           type: 'garden',
         }),
