@@ -1,0 +1,134 @@
+import { MessageFlags, SlashCommandBuilder } from 'discord.js';
+import {
+  errorEmbed,
+  infoEmbed,
+  successEmbed,
+} from '../utils/embeds.js';
+import { logger } from '../utils/logger.js';
+import { fileURLToPath } from 'node:url';
+import path from 'node:path';
+import fs from 'node:fs/promises';
+
+export default {
+  data: new SlashCommandBuilder()
+    .setName('setup')
+    .setDescription('Setup your server with a user friendly wizard!')
+    .addSubcommand((sub) =>
+      sub
+        .setName('emojis')
+        .setDescription(
+          'Upload emojis for the bot to use (owner only).',
+        ),
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('wizard')
+        .setDescription(
+          'Setup your server with a user friendly wizard.',
+        ),
+    ),
+
+  /**
+   * @param {import('../bot/client.js').default} client
+   * @param {import('discord.js').ChatInputCommandInteraction} interaction
+   */
+  async execute(client, interaction) {
+    const subcommand = interaction.options.getSubcommand();
+
+    if (subcommand == 'emojis')
+      return await this.setupEmojis(client, interaction);
+    else return await this.setupWizard(client, interaction);
+  },
+
+  /**
+   * @param {import('../bot/client.js').default} client
+   * @param {import('discord.js').ChatInputCommandInteraction} interaction
+   */
+  async setupEmojis(client, interaction) {
+    if (interaction.member.id != client.ownerId) {
+      return await interaction.reply({
+        embeds: [
+          errorEmbed(
+            'Only the owner of this bot can use this subcommand.',
+          ),
+        ],
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
+    try {
+      const emojis = (await client.db.get('emojis')) || {};
+      const __dirname = path.dirname(fileURLToPath(import.meta.url));
+      const assetsPath = path.resolve(__dirname, '../../assets');
+      const files = (await fs.readdir(assetsPath)).filter((f) =>
+        f.endsWith('.png'),
+      );
+
+      if (!files.length) {
+        return interaction.editReply({
+          embeds: [errorEmbed('No images to upload.')],
+        });
+      }
+
+      await interaction.editReply({
+        embeds: [infoEmbed(`Processing ${files.length} images...`)],
+      });
+
+      let created = 0;
+      let updated = 0;
+
+      await interaction.guild.emojis.fetch();
+
+      for (const file of files) {
+        const emojiName = path.basename(file, '.png');
+        const filePath = path.join(assetsPath, file);
+        const existing = interaction.guild.emojis.cache.find(
+          (e) => e.name === emojiName,
+        );
+
+        if (existing) {
+          emojis[existing.name] = existing.toString();
+          updated++;
+        } else {
+          const emoji = await interaction.guild.emojis.create({
+            attachment: filePath,
+            name: emojiName,
+          });
+
+          emojis[emoji.name] = emoji.toString();
+          created++;
+
+          await new Promise((r) => setTimeout(r, 1000));
+        }
+      }
+
+      await client.db.set('emojis', emojis);
+
+      return interaction.editReply({
+        embeds: [
+          successEmbed(
+            `Sync complete! Created: ${created}, Updated: ${updated}.`,
+          ),
+        ],
+      });
+    } catch (err) {
+      logger.error(err);
+      return interaction.editReply({
+        embeds: [errorEmbed('No permissions to upload.')],
+      });
+    }
+  },
+
+  /**
+   * @param {import('../bot/client.js').default} client
+   * @param {import('discord.js').ChatInputCommandInteraction} interaction
+   */
+  async setupWizard(client, interaction) {
+    await interaction.reply({
+      embeds: [errorEmbed('Command not configured yet.')],
+      flags: MessageFlags.Ephemeral,
+    });
+  },
+};

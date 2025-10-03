@@ -1,33 +1,33 @@
 import colors from '../colors.js';
 import { EmbedBuilder } from 'discord.js';
 
-export const mainEmbed = (title) => {
+export const mainEmbed = (description) => {
   const embed = new EmbedBuilder()
-    .setDescription(title)
+    .setDescription(description)
     .setColor(colors.mainColor);
 
   return embed;
 };
 
-export const successEmbed = (title) => {
+export const successEmbed = (description) => {
   const embed = new EmbedBuilder()
-    .setDescription(title)
+    .setDescription(description)
     .setColor(colors.successColor);
 
   return embed;
 };
 
-export const infoEmbed = (title) => {
+export const infoEmbed = (description) => {
   const embed = new EmbedBuilder()
-    .setDescription(title)
+    .setDescription(description)
     .setColor(colors.infoColor);
 
   return embed;
 };
 
-export const errorEmbed = (title) => {
+export const errorEmbed = (description) => {
   const embed = new EmbedBuilder()
-    .setDescription(title)
+    .setDescription(description)
     .setColor(colors.errorColor);
 
   return embed;
