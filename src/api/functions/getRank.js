@@ -23,7 +23,7 @@ export const getRank = async (apiKey, uuid) => {
 
   const player = data?.player;
   let rank = '';
-  
+
   if (player.prefix) {
     rank = player.prefix.replace(/§[0-9|a-z]|\[|\]/g, '');
   } else if (player.rank && 'NORMAL' !== player.rank) {
@@ -38,7 +38,11 @@ export const getRank = async (apiKey, uuid) => {
   } else {
     switch (player.newPackageRank) {
       case 'MVP_PLUS':
-        rank = player.monthlyPackageRank && 'SUPERSTAR' === player.monthlyPackageRank ? 'mvp_plus_plus' : 'mvp_plus';
+        rank =
+          player.monthlyPackageRank &&
+          'SUPERSTAR' === player.monthlyPackageRank
+            ? 'mvp_plus_plus'
+            : 'mvp_plus';
         break;
       case 'MVP':
         rank = 'mvp';
@@ -50,7 +54,11 @@ export const getRank = async (apiKey, uuid) => {
         rank = 'vip';
         break;
       default:
-        rank = player.monthlyPackageRank && 'SUPERSTAR' === player.monthlyPackageRank ? 'mvp_plus_plus' : 'non';
+        rank =
+          player.monthlyPackageRank &&
+          'SUPERSTAR' === player.monthlyPackageRank
+            ? 'mvp_plus_plus'
+            : 'non';
     }
   }
 

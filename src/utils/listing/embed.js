@@ -13,18 +13,18 @@ import { getSkillAverage } from '../../api/stats/skills.js';
 import { getDungeons } from '../../api/stats/dungeons.js';
 import { getSBLevel } from '../../api/stats/player.js';
 import { formatNumber } from '../format.js';
-import colors from '../../colors.js';
 import { getRank } from '../../api/functions/getRank.js';
+import colors from '../../colors.js';
+
+const showEmoji = (emojis, name) => {
+  return emojis[name] ? `${emojis[name]} ` : '';
+};
 
 export const generateMainEmbed = async (client, interaction, ign) => {
   const emojis = (await client.db.get('emojis')) || {};
 
-  const showEmoji = (name) => {
-    return emojis[name] ? `${emojis[name]} ` : '';
-  };
-
   const uuid = await getUUID(ign);
-  const rank = await getRank(client.hyApiKey, uuid)
+  const rank = await getRank(client.hyApiKey, uuid);
 
   const profile = await getProfileData(client.hyApiKey, uuid);
   const gardenData = await getGardenData(
@@ -55,24 +55,24 @@ export const generateMainEmbed = async (client, interaction, ign) => {
         inline: false,
       },
       {
-        name: `${showEmoji('sblevel')}SB Level`,
+        name: `${showEmoji(emojis, 'sblevel')}SB Level`,
         value: getSBLevel(member).toString(),
         inline: true,
       },
       {
-        name: `${showEmoji('foraging')}Skill Average`,
+        name: `${showEmoji(emojis, 'foraging')}Skill Average`,
         value: getSkillAverage(member, profile).toString(),
         inline: true,
       },
       {
-        name: `${showEmoji('maddox_batphone')}Slayer`,
+        name: `${showEmoji(emojis, 'maddox_batphone')}Slayer`,
         value: Object.values(getSlayer(member))
           .map((slayer) => slayer.level)
           .join('/'),
         inline: true,
       },
       {
-        name: `${showEmoji('bank')}Networth`,
+        name: `${showEmoji(emojis, 'bank')}Networth`,
         value: (() => {
           if (!networth) return 'No Networth Data';
           const totalNetworth = (networth.networth ?? 0).toFixed(2);
@@ -87,7 +87,7 @@ export const generateMainEmbed = async (client, interaction, ign) => {
         inline: true,
       },
       {
-        name: `${showEmoji('garden')}Garden`,
+        name: `${showEmoji(emojis, 'garden')}Garden`,
         value: (() => {
           if (!garden) return 'No Garden Data';
           const level = garden.level.level ?? 0;
@@ -108,12 +108,12 @@ export const generateMainEmbed = async (client, interaction, ign) => {
         inline: true,
       },
       {
-        name: `${showEmoji('dungeon_skull')}Dungeons`,
+        name: `${showEmoji(emojis, 'dungeon_skull')}Dungeons`,
         value: `**Catacombs:** ${dungeons.dungeons.level.toFixed(2)}\n**Class Avg:** ${dungeons.classAverage.toFixed(2)}`,
         inline: true,
       },
       {
-        name: `${showEmoji('pickaxe')}Mining`,
+        name: `${showEmoji(emojis, 'pickaxe')}Mining`,
         value: (() => {
           if (!mining) return 'No Mining Data';
           const level = mining.level?.level ?? 0;
@@ -126,7 +126,7 @@ export const generateMainEmbed = async (client, interaction, ign) => {
         inline: true,
       },
       {
-        name: `${showEmoji('cobblestone_minion')}Minions`,
+        name: `${showEmoji(emojis, 'cobblestone_minion')}Minions`,
         value: minions
           ? `**Total Slots:** ${minions.total}\n**Crafted Slots:** ${minions.crafted} (**${minions.untilNext}** until next)\n**Bonus Slots:** ${minions.community}/5`
           : 'No Minion Data',
@@ -139,6 +139,88 @@ export const generateMainEmbed = async (client, interaction, ign) => {
       text: `Listed by ${interaction.member.displayName}`,
     })
     .setTimestamp();
+
+  return embed;
+};
+
+const baseStatEmbed = (title) => {
+  return new EmbedBuilder()
+    .setTitle(`Account Information - ${title}`)
+    .setColor(colors.mainColor)
+    .setFooter({
+      text: 'Made by Nathan | https://quiteboring.dev',
+      iconURL: 'https://quiteboring.dev/pfp.jpg'
+    })
+}
+
+export const generateSkillsEmbed = async (
+  client,
+  interaction,
+  ign,
+) => {
+  const emojis = (await client.db.get('emojis')) || {};
+
+  const showEmoji = (name) => {
+    return emojis[name] ? `${emojis[name]} ` : '';
+  };
+
+  const embed = baseStatEmbed('Skills');
+
+  return embed;
+};
+
+export const generateDungeonsEmbed = async (
+  client,
+  interaction,
+  ign,
+) => {
+  const emojis = (await client.db.get('emojis')) || {};
+
+  const showEmoji = (name) => {
+    return emojis[name] ? `${emojis[name]} ` : '';
+  };
+
+  const embed = baseStatEmbed('Dungeons');
+
+  return embed;
+};
+
+export const generateKuudraEmbed = async (
+  client,
+  interaction,
+  ign,
+) => {
+  const emojis = (await client.db.get('emojis')) || {};
+
+  const showEmoji = (name) => {
+    return emojis[name] ? `${emojis[name]} ` : '';
+  };
+
+  const embed = baseStatEmbed('Kuudra');
+
+  return embed;
+};
+
+export const generateFarmingEmbed = async (
+  client,
+  interaction,
+  ign,
+) => {
+  const emojis = (await client.db.get('emojis')) || {};
+
+  const embed = baseStatEmbed('Farming');
+
+  return embed;
+};
+
+export const generateNetworthEmbed = async (
+  client,
+  interaction,
+  ign,
+) => {
+  const emojis = (await client.db.get('emojis')) || {};
+
+  const embed = baseStatEmbed('Networth');
 
   return embed;
 };
