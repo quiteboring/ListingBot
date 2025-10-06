@@ -62,9 +62,29 @@ export default {
       const emojis = (await client.db.get('emojis')) || {};
       const __dirname = path.dirname(fileURLToPath(import.meta.url));
       const assetsPath = path.resolve(__dirname, '../../assets');
-      const files = (await fs.readdir(assetsPath)).filter((f) =>
-        f.endsWith('.png'),
-      );
+
+      async function findImageFiles(dir) {
+        let results = [];
+        const entries = await fs.readdir(dir, {
+          withFileTypes: true,
+        });
+
+        for (const entry of entries) {
+          const fullPath = path.join(dir, entry.name);
+          if (entry.isDirectory()) {
+            results = results.concat(await findImageFiles(fullPath));
+          } else if (
+            entry.isFile() &&
+            (entry.name.endsWith('.png') || entry.name.endsWith('.gif'))
+          ) {
+            results.push(fullPath);
+          }
+        }
+
+        return results;
+      }
+
+      const files = await findImageFiles(assetsPath);
 
       if (!files.length) {
         return interaction.editReply({
@@ -81,9 +101,9 @@ export default {
 
       await interaction.guild.emojis.fetch();
 
-      for (const file of files) {
-        const emojiName = path.basename(file, '.png');
-        const filePath = path.join(assetsPath, file);
+      for (const filePath of files) {
+        const ext = path.extname(filePath);
+        const emojiName = path.basename(filePath, ext);
         const existing = interaction.guild.emojis.cache.find(
           (e) => e.name === emojiName,
         );

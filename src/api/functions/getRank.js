@@ -1,6 +1,16 @@
 import fetch from 'node-fetch';
 
+const cache = new Map();
+
 export const getRank = async (apiKey, uuid) => {
+  if (cache.has(uuid)) {
+    const data = cache.get(uuid);
+
+    if (data.last_save + 300000 > Date.now()) {
+      return data.data;
+    }
+  }
+
   const response = await fetch(
     `https://api.hypixel.net/v2/player?key=${apiKey}&uuid=${uuid}`,
   );
@@ -29,10 +39,10 @@ export const getRank = async (apiKey, uuid) => {
   } else if (player.rank && 'NORMAL' !== player.rank) {
     switch (player.rank) {
       case 'YOUTUBER':
-        rank = 'youtube';
+        rank = '[YouTuber]';
         break;
       default:
-        rank = 'non';
+        rank = '[Non]';
         break;
     }
   } else {
@@ -41,26 +51,27 @@ export const getRank = async (apiKey, uuid) => {
         rank =
           player.monthlyPackageRank &&
           'SUPERSTAR' === player.monthlyPackageRank
-            ? 'mvp_plus_plus'
-            : 'mvp_plus';
+            ? '[Mvp++]'
+            : '[Mvp+]';
         break;
       case 'MVP':
-        rank = 'mvp';
+        rank = '[Mvp]';
         break;
       case 'VIP_PLUS':
-        rank = 'vip_plus';
+        rank = '[Vip+]';
         break;
       case 'VIP':
-        rank = 'vip';
+        rank = '[Vip]';
         break;
       default:
         rank =
           player.monthlyPackageRank &&
           'SUPERSTAR' === player.monthlyPackageRank
-            ? 'mvp_plus_plus'
-            : 'non';
+            ? '[Mvp++]'
+            : '[Non]';
     }
   }
 
-  return rank.toLowerCase();
+  cache.set(uuid, { data: rank, last_save: Date.now() });
+  return rank;
 };

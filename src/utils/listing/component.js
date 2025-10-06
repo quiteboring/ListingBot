@@ -26,14 +26,14 @@ export const getStatsBreakdown = async (client, msgId = -1) => {
         {
           label: 'Kuudra',
           description: 'View kuudra progression and progression',
-          emoji: emojis['kuudra'],
+          emoji: emojis['basic'],
           value: 'kuudra',
         },
         {
           label: 'Farming',
           description:
             'View Jacob contest medals and garden plots unlocked',
-          emoji: emojis['hoe'],
+          emoji: emojis['farming'],
           value: 'farming',
         },
         {

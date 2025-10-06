@@ -28,7 +28,7 @@ export default {
     const listings =
       (await client.db.get(`listings_${interaction.guild.id}`)) || [];
 
-    const ign = listings.find(
+    const data = listings.find(
       (item) =>
         item.channelId === interaction.channel.id &&
         item.messageId === msgId,
@@ -36,7 +36,7 @@ export default {
 
     let embed = errorEmbed('Unable to find IGN stored in database.');
 
-    if (!ign) {
+    if (!data) {
       return await interaction.reply({
         embeds: [embed],
         flags: MessageFlags.Ephemeral,
@@ -48,26 +48,48 @@ export default {
 
     switch (option) {
       case 'skills':
-        embed = await generateSkillsEmbed(client, interaction, ign);
+        embed = await generateSkillsEmbed(
+          client,
+          interaction,
+          data.ign,
+        );
         break;
       case 'dungeons':
-        embed = await generateDungeonsEmbed(client, interaction, ign);
+        embed = await generateDungeonsEmbed(
+          client,
+          interaction,
+          data.ign,
+        );
         break;
       case 'kuudra':
-        embed = await generateKuudraEmbed(client, interaction, ign);
+        embed = await generateKuudraEmbed(
+          client,
+          interaction,
+          data.ign,
+        );
         break;
       case 'farming':
-        embed = await generateFarmingEmbed(client, interaction, ign);
+        embed = await generateFarmingEmbed(
+          client,
+          interaction,
+          data.ign,
+        );
         break;
       case 'networth':
-        embed = await generateNetworthEmbed(client, interaction, ign);
+        embed = await generateNetworthEmbed(
+          client,
+          interaction,
+          data.ign,
+        );
         break;
     }
-
-    return await interaction.reply({
-      embeds: [embed],
-      components: [row],
-      flags: MessageFlags.Ephemeral,
-    });
+    
+    try {
+      return await interaction.reply({
+        embeds: [embed],
+        components: [row],
+        flags: MessageFlags.Ephemeral,
+      });
+    } catch (e) {}
   },
 };

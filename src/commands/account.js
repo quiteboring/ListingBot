@@ -1,4 +1,11 @@
-import { MessageFlags, SlashCommandBuilder } from 'discord.js';
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  MessageFlags,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+} from 'discord.js';
 import { errorEmbed } from '../utils/embeds.js';
 import { generateMainEmbed } from '../utils/listing/embed.js';
 import { getStatsBreakdown } from '../utils/listing/component.js';
@@ -6,7 +13,8 @@ import { getStatsBreakdown } from '../utils/listing/component.js';
 export default {
   data: new SlashCommandBuilder()
     .setName('account')
-    .setDescription('View account details!'),
+    .setDescription('View account details!')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
 
   /**
    * @param {import('../bot/client.js').default} client
@@ -22,10 +30,21 @@ export default {
 
       const embed = await generateMainEmbed(client, interaction, ign);
       const row = await getStatsBreakdown(client);
+      const secondRow = new ActionRowBuilder().addComponents(
+        new ButtonBuilder()
+          .setCustomId('buy_account')
+          .setStyle(ButtonStyle.Secondary)
+          .setLabel('Buy Account')
+          .setEmoji('💸'),
+        new ButtonBuilder()
+          .setCustomId('unlist_account')
+          .setStyle(ButtonStyle.Danger)
+          .setLabel('Unlist'),
+      );
 
       await interaction.reply({
         embeds: [embed],
-        components: [row],
+        components: [row, secondRow],
         withResponse: true,
       });
 

@@ -11,3 +11,18 @@ export const formatNumber = (n, d = 1) => {
 
   return `${n.toFixed(d)}${u[i]}`;
 };
+
+export const titleCase = (str) => {
+  if (!str) return "";
+
+  if (typeof str !== "string") {
+    return "";
+  }
+
+  return str
+    .toLowerCase()
+    .replaceAll("_", " ")
+    .split(" ")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}

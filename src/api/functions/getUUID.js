@@ -1,6 +1,16 @@
 import fetch from 'node-fetch';
 
+const cache = new Map();
+
 export const getUUID = async (ign) => {
+  if (cache.has(ign)) {
+    const data = cache.get(ign);
+
+    if (data.last_save + 300000 > Date.now()) {
+      return data.data;
+    }
+  }
+
   const response = await fetch(
     `https://api.mojang.com/users/profiles/minecraft/${ign}`,
   );
@@ -16,5 +26,7 @@ export const getUUID = async (ign) => {
   }
 
   const data = await response.json();
+
+  cache.set(ign, { data: data.id, last_save: Date.now() });
   return data.id;
 };

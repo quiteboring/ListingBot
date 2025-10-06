@@ -9,12 +9,16 @@ import { getProfileData } from '../../api/functions/getProfileData.js';
 import { getGardenData } from '../../api/functions/getGardenData.js';
 import { getSlayer } from '../../api/stats/slayer.js';
 import { getMining } from '../../api/stats/mining.js';
-import { getSkillAverage } from '../../api/stats/skills.js';
+import {
+  getSkillAverage,
+  getSkills,
+} from '../../api/stats/skills.js';
 import { getDungeons } from '../../api/stats/dungeons.js';
 import { getSBLevel } from '../../api/stats/player.js';
-import { formatNumber } from '../format.js';
+import { formatNumber, titleCase } from '../format.js';
 import { getRank } from '../../api/functions/getRank.js';
 import colors from '../../colors.js';
+import { getCrimsonIsle, getKuudra } from '../../api/stats/crimson.js';
 
 const showEmoji = (emojis, name) => {
   return emojis[name] ? `${emojis[name]} ` : '';
@@ -51,7 +55,7 @@ export const generateMainEmbed = async (client, interaction, ign) => {
     .setFields([
       {
         name: 'Rank',
-        value: `${emojis[rank + '1']}${emojis[rank + '2']}`,
+        value: rank,
         inline: false,
       },
       {
@@ -113,7 +117,7 @@ export const generateMainEmbed = async (client, interaction, ign) => {
         inline: true,
       },
       {
-        name: `${showEmoji(emojis, 'pickaxe')}Mining`,
+        name: `${showEmoji(emojis, 'mining')}Mining`,
         value: (() => {
           if (!mining) return 'No Mining Data';
           const level = mining.level?.level ?? 0;
@@ -141,17 +145,18 @@ export const generateMainEmbed = async (client, interaction, ign) => {
     .setTimestamp();
 
   return embed;
-};
+}
 
 const baseStatEmbed = (title) => {
   return new EmbedBuilder()
     .setTitle(`Account Information - ${title}`)
+    .setThumbnail(`https://mc-heads.net/avatar/anonymous`)
     .setColor(colors.mainColor)
     .setFooter({
       text: 'Made by Nathan | https://quiteboring.dev',
-      iconURL: 'https://quiteboring.dev/pfp.jpg'
-    })
-}
+      iconURL: 'https://quiteboring.dev/pfp.jpg',
+    });
+};
 
 export const generateSkillsEmbed = async (
   client,
@@ -160,11 +165,26 @@ export const generateSkillsEmbed = async (
 ) => {
   const emojis = (await client.db.get('emojis')) || {};
 
+  const uuid = await getUUID(ign);
+  const profile = await getProfileData(client.hyApiKey, uuid);
+  const member = getMember(profile, uuid);
+  const skills = getSkills(member, profile);
+
   const showEmoji = (name) => {
     return emojis[name] ? `${emojis[name]} ` : '';
   };
 
   const embed = baseStatEmbed('Skills');
+
+  for (const [name, data] of Object.entries(skills)) {
+    embed.addFields([
+      {
+        name: `${showEmoji(name)}${name.charAt(0).toUpperCase() + name.slice(1)} ${data['level']}`,
+        value: formatNumber(data['xp']),
+        inline: true,
+      },
+    ]);
+  }
 
   return embed;
 };
@@ -182,6 +202,28 @@ export const generateDungeonsEmbed = async (
 
   const embed = baseStatEmbed('Dungeons');
 
+  const uuid = await getUUID(ign);
+  const profile = await getProfileData(client.hyApiKey, uuid);
+  const member = getMember(profile, uuid);
+  const data = getDungeons(member);
+
+  embed.addFields([
+    {
+      name: `${showEmoji('dungeon_skull')}Catacombs`,
+      value: `**Level:** ${data.dungeons.levelWithProgress.toFixed(2)}\n**XP:** ${formatNumber(data.dungeons.xp, 2)}\n**Class Avg:** ${formatNumber(data.classAverage, 2)}`,
+    }
+  ])
+
+  for (const [className, classData] of Object.entries(data.classes)) {
+    embed.addFields([
+      {
+        name: `${showEmoji(className)}${className.charAt(0).toUpperCase() + className.slice(1)}`,
+        value: `**Level:** ${classData.levelWithProgress.toFixed(2)}\n**XP:** ${formatNumber(classData.xp, 2)}`,
+        inline: true,
+      },
+    ]);
+  }
+
   return embed;
 };
 
@@ -198,6 +240,28 @@ export const generateKuudraEmbed = async (
 
   const embed = baseStatEmbed('Kuudra');
 
+  const uuid = await getUUID(ign);
+  const profile = await getProfileData(client.hyApiKey, uuid);
+  const member = getMember(profile, uuid);
+
+  const isle = getCrimsonIsle(member);
+  const data = getKuudra(member);
+
+  embed.setDescription(`Faction: **${isle?.faction || 'None'}**\n${showEmoji('barbarian')}Barbarian Rep: **${formatNumber(isle?.reputation.barbarian, 2) ?? 0}**\n${showEmoji('mage_faction')}Mage Rep: **${formatNumber(isle?.reputation.mage, 2) ?? 0}**`);
+
+  let kuudraValue = '';
+
+  for (const [tier, count] of Object.entries(data)) {
+    kuudraValue += `${showEmoji(tier)}${titleCase(tier)}: **${count ?? 0}**\n`;
+  }
+
+  embed.addFields([
+    {
+      name: `Kuudra Completions`,
+      value: kuudraValue,
+    },
+  ]);
+
   return embed;
 };
 
@@ -210,6 +274,31 @@ export const generateFarmingEmbed = async (
 
   const embed = baseStatEmbed('Farming');
 
+  const uuid = await getUUID(ign);
+  const profile = await getProfileData(client.hyApiKey, uuid);
+  const gardenData = await getGardenData(client.hyApiKey, profile.profile_id);
+  const garden = getGarden(gardenData);
+
+  embed.setDescription(`Garden Level: **${garden.level.unlockableLevelWithProgress.toFixed(2)}** (**${formatNumber(garden.level.xp, 2)}** XP)\nVisitors Served: **${gardenData?.commission_data?.total_completed ?? 0}**\nUnique Visitors: **${gardenData?.commission_data?.unique_npcs_served ?? 0}**`);
+
+  if (garden.unlockedPlots) {
+    const cactusGreen = emojis['cactus_green'] || '🟩';
+    const redDye = emojis['rose_dye'] || '🟥';
+    const bedrock = emojis['bedrock'] || '⬛';
+
+    const grid = garden.unlockedPlots.map((row, y) =>
+      row.map((cell, x) => {
+        if (cell === 'center') return bedrock;
+        return cell === 'unlocked' ? cactusGreen : redDye;
+      }).join(' ')
+    ).join('\n');
+    
+    embed.addFields({
+      name: 'Unlocked Plots',
+      value: grid,
+      inline: false,
+    });
+  }
   return embed;
 };
 
@@ -221,6 +310,83 @@ export const generateNetworthEmbed = async (
   const emojis = (await client.db.get('emojis')) || {};
 
   const embed = baseStatEmbed('Networth');
+  
+  const uuid = await getUUID(ign);
+  const profile = await getProfileData(client.hyApiKey, uuid);
+  const museumData = await getMuseumData(
+    client.hyApiKey,
+    profile.profile_id,
+  );
+  
+  const member = getMember(profile, uuid);
+  const networth = await getNetworth(profile, member, museumData);
+
+  if (!networth || !networth.types) {
+    embed.setDescription('No Networth Data');
+    return embed;
+  }
+    
+  if (networth) {
+    embed.addFields([
+      {
+        name: `${showEmoji(emojis, 'gold')}Purse`,
+        value: formatNumber(networth.purse ?? 0),
+        inline: true,
+      },
+      {
+        name: `${showEmoji(emojis, 'bank')}Bank`,
+        value: formatNumber(networth.bank ?? 0),
+        inline: true,
+      },
+      {
+        name: `${showEmoji(emojis, 'essence')}Essence`,
+        value: formatNumber(networth.types.essence?.total ?? 0),
+        inline: true,
+      },
+    ]);
+  }
+
+  function getTopItems(items) {
+    if (!Array.isArray(items) || items.length === 0) return 'No items found';
+    return items
+      .filter(i => typeof i === 'object' && i !== null && typeof i.price === 'number')
+      .sort((a, b) => b.price - a.price)
+      .slice(0, 5)
+      .map(item => `${item.name ? item.name : 'Unknown'} (${formatNumber(item.price)})`)
+      .join('\n');
+  }
+
+  if (networth.types.armor) {
+    embed.addFields({
+      name: `${showEmoji(emojis, 'tank')}Armor (${formatNumber(networth.types.armor.total ?? 0)})`,
+      value: getTopItems(networth.types.armor.items),
+      inline: false,
+    });
+  }
+
+  if (networth.types.inventory) {
+    embed.addFields({
+      name: `${showEmoji(emojis, 'berserk')}Items (${formatNumber(networth.types.inventory.total ?? 0)})`,
+      value: getTopItems(networth.types.inventory.items),
+      inline: false,
+    });
+  }
+
+  if (networth.types.pets) {
+    embed.addFields({
+      name: `${showEmoji(emojis, 'taming')}Pets (${formatNumber(networth.types.pets.total ?? 0)})`,
+      value: getTopItems(networth.types.pets.items),
+      inline: false,
+    });
+  }
+
+  if (networth.types.accessories) {
+    embed.addFields({
+      name: `${showEmoji(emojis, 'accessories')}Accessories (${formatNumber(networth.types.accessories.total ?? 0)})`,
+      value: getTopItems(networth.types.accessories.items),
+      inline: false,
+    });
+  }
 
   return embed;
-};
+}
