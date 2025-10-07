@@ -364,10 +364,36 @@ export const generateNetworthEmbed = async (
     });
   }
 
-  if (networth.types.inventory) {
+  function getAllItems(types, keys) {
+    let items = [];
+
+    for (const key of keys) {
+      if (types[key] && Array.isArray(types[key].items)) {
+        items = items.concat(types[key].items);
+      }
+    }
+    return items;
+  }
+
+  if (networth.types) {
+    const allItemKeys = [
+      'inventory',
+      'enderchest',
+      'wardrobe',
+      'storage',
+      'equipment',
+      'personal_vault',
+      'fishing_bag',
+      'potion_bag',
+      'sacks_bag',
+      'sacks'
+    ];
+
+    const allItems = getAllItems(networth.types, allItemKeys);
+
     embed.addFields({
-      name: `${showEmoji(emojis, 'berserk')}Items (${formatNumber(networth.types.inventory.total ?? 0)})`,
-      value: getTopItems(networth.types.inventory.items),
+      name: `${showEmoji(emojis, 'berserk')}Items (${formatNumber(allItems.reduce((sum, item) => sum + (item.price || 0), 0))})`,
+      value: getTopItems(allItems),
       inline: false,
     });
   }
