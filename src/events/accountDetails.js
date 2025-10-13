@@ -83,7 +83,7 @@ export default {
         );
         break;
     }
-    
+
     try {
       return await interaction.reply({
         embeds: [embed],

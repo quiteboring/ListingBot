@@ -75,7 +75,8 @@ export default {
             results = results.concat(await findImageFiles(fullPath));
           } else if (
             entry.isFile() &&
-            (entry.name.endsWith('.png') || entry.name.endsWith('.gif'))
+            (entry.name.endsWith('.png') ||
+              entry.name.endsWith('.gif'))
           ) {
             results.push(fullPath);
           }

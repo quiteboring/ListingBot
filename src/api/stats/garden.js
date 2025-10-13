@@ -8,15 +8,51 @@ export const getGarden = (garden) => {
 
     const unlockedIds = garden.unlocked_plots_ids || [];
     const plotOrder = [
-      ['expert_1',    'advanced_1',   'advanced_6',   'advanced_8',   'expert_3'],
-      ['advanced_2',  'beginner_1',   'intermediate_1','beginner_4',  'advanced_10'],
-      ['advanced_3',  'intermediate_2', null,         'intermediate_3','advanced_11'],
-      ['advanced_5',  'beginner_3',   'intermediate_4','beginner_2',  'advanced_12'],
-      ['expert_2',    'advanced_7',   'advanced_9',   'advanced_4',   'expert_4'],
+      [
+        'expert_1',
+        'advanced_1',
+        'advanced_6',
+        'advanced_8',
+        'expert_3',
+      ],
+      [
+        'advanced_2',
+        'beginner_1',
+        'intermediate_1',
+        'beginner_4',
+        'advanced_10',
+      ],
+      [
+        'advanced_3',
+        'intermediate_2',
+        null,
+        'intermediate_3',
+        'advanced_11',
+      ],
+      [
+        'advanced_5',
+        'beginner_3',
+        'intermediate_4',
+        'beginner_2',
+        'advanced_12',
+      ],
+      [
+        'expert_2',
+        'advanced_7',
+        'advanced_9',
+        'advanced_4',
+        'expert_4',
+      ],
     ];
 
-    const unlockedPlots = plotOrder.map(row =>
-      row.map(plotId => plotId === null ? 'center' : (unlockedIds.includes(plotId) ? 'unlocked' : 'locked'))
+    const unlockedPlots = plotOrder.map((row) =>
+      row.map((plotId) =>
+        plotId === null
+          ? 'center'
+          : unlockedIds.includes(plotId)
+            ? 'unlocked'
+            : 'locked',
+      ),
     );
 
     return {

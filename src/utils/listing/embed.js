@@ -18,7 +18,10 @@ import { getSBLevel } from '../../api/stats/player.js';
 import { formatNumber, titleCase } from '../format.js';
 import { getRank } from '../../api/functions/getRank.js';
 import colors from '../../colors.js';
-import { getCrimsonIsle, getKuudra } from '../../api/stats/crimson.js';
+import {
+  getCrimsonIsle,
+  getKuudra,
+} from '../../api/stats/crimson.js';
 
 const showEmoji = (emojis, name) => {
   return emojis[name] ? `${emojis[name]} ` : '';
@@ -145,7 +148,7 @@ export const generateMainEmbed = async (client, interaction, ign) => {
     .setTimestamp();
 
   return embed;
-}
+};
 
 const baseStatEmbed = (title) => {
   return new EmbedBuilder()
@@ -211,8 +214,8 @@ export const generateDungeonsEmbed = async (
     {
       name: `${showEmoji('dungeon_skull')}Catacombs`,
       value: `**Level:** ${data.dungeons.levelWithProgress.toFixed(2)}\n**XP:** ${formatNumber(data.dungeons.xp, 2)}\n**Class Avg:** ${formatNumber(data.classAverage, 2)}`,
-    }
-  ])
+    },
+  ]);
 
   for (const [className, classData] of Object.entries(data.classes)) {
     embed.addFields([
@@ -247,7 +250,9 @@ export const generateKuudraEmbed = async (
   const isle = getCrimsonIsle(member);
   const data = getKuudra(member);
 
-  embed.setDescription(`Faction: **${isle?.faction || 'None'}**\n${showEmoji('barbarian')}Barbarian Rep: **${formatNumber(isle?.reputation.barbarian, 2) ?? 0}**\n${showEmoji('mage_faction')}Mage Rep: **${formatNumber(isle?.reputation.mage, 2) ?? 0}**`);
+  embed.setDescription(
+    `Faction: **${isle?.faction || 'None'}**\n${showEmoji('barbarian')}Barbarian Rep: **${formatNumber(isle?.reputation.barbarian, 2) ?? 0}**\n${showEmoji('mage_faction')}Mage Rep: **${formatNumber(isle?.reputation.mage, 2) ?? 0}**`,
+  );
 
   let kuudraValue = '';
 
@@ -276,23 +281,32 @@ export const generateFarmingEmbed = async (
 
   const uuid = await getUUID(ign);
   const profile = await getProfileData(client.hyApiKey, uuid);
-  const gardenData = await getGardenData(client.hyApiKey, profile.profile_id);
+  const gardenData = await getGardenData(
+    client.hyApiKey,
+    profile.profile_id,
+  );
   const garden = getGarden(gardenData);
 
-  embed.setDescription(`Garden Level: **${garden.level.unlockableLevelWithProgress.toFixed(2)}** (**${formatNumber(garden.level.xp, 2)}** XP)\nVisitors Served: **${gardenData?.commission_data?.total_completed ?? 0}**\nUnique Visitors: **${gardenData?.commission_data?.unique_npcs_served ?? 0}**`);
+  embed.setDescription(
+    `Garden Level: **${garden.level.unlockableLevelWithProgress.toFixed(2)}** (**${formatNumber(garden.level.xp, 2)}** XP)\nVisitors Served: **${gardenData?.commission_data?.total_completed ?? 0}**\nUnique Visitors: **${gardenData?.commission_data?.unique_npcs_served ?? 0}**`,
+  );
 
   if (garden.unlockedPlots) {
     const cactusGreen = emojis['cactus_green'] || '🟩';
     const redDye = emojis['rose_dye'] || '🟥';
     const bedrock = emojis['bedrock'] || '⬛';
 
-    const grid = garden.unlockedPlots.map((row, y) =>
-      row.map((cell, x) => {
-        if (cell === 'center') return bedrock;
-        return cell === 'unlocked' ? cactusGreen : redDye;
-      }).join(' ')
-    ).join('\n');
-    
+    const grid = garden.unlockedPlots
+      .map((row, y) =>
+        row
+          .map((cell, x) => {
+            if (cell === 'center') return bedrock;
+            return cell === 'unlocked' ? cactusGreen : redDye;
+          })
+          .join(' '),
+      )
+      .join('\n');
+
     embed.addFields({
       name: 'Unlocked Plots',
       value: grid,
@@ -310,14 +324,14 @@ export const generateNetworthEmbed = async (
   const emojis = (await client.db.get('emojis')) || {};
 
   const embed = baseStatEmbed('Networth');
-  
+
   const uuid = await getUUID(ign);
   const profile = await getProfileData(client.hyApiKey, uuid);
   const museumData = await getMuseumData(
     client.hyApiKey,
     profile.profile_id,
   );
-  
+
   const member = getMember(profile, uuid);
   const networth = await getNetworth(profile, member, museumData);
 
@@ -325,7 +339,7 @@ export const generateNetworthEmbed = async (
     embed.setDescription('No Networth Data');
     return embed;
   }
-    
+
   if (networth) {
     embed.addFields([
       {
@@ -347,12 +361,21 @@ export const generateNetworthEmbed = async (
   }
 
   function getTopItems(items) {
-    if (!Array.isArray(items) || items.length === 0) return 'No items found';
+    if (!Array.isArray(items) || items.length === 0)
+      return 'No items found';
     return items
-      .filter(i => typeof i === 'object' && i !== null && typeof i.price === 'number')
+      .filter(
+        (i) =>
+          typeof i === 'object' &&
+          i !== null &&
+          typeof i.price === 'number',
+      )
       .sort((a, b) => b.price - a.price)
       .slice(0, 5)
-      .map(item => `${item.name ? item.name : 'Unknown'} (${formatNumber(item.price)})`)
+      .map(
+        (item) =>
+          `${item.name ? item.name : 'Unknown'} (${formatNumber(item.price)})`,
+      )
       .join('\n');
   }
 
@@ -386,7 +409,7 @@ export const generateNetworthEmbed = async (
       'fishing_bag',
       'potion_bag',
       'sacks_bag',
-      'sacks'
+      'sacks',
     ];
 
     const allItems = getAllItems(networth.types, allItemKeys);
@@ -415,4 +438,4 @@ export const generateNetworthEmbed = async (
   }
 
   return embed;
-}
+};
