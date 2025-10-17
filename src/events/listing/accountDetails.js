@@ -1,19 +1,19 @@
 import { MessageFlags } from 'discord.js';
-import { errorEmbed } from '../utils/embeds.js';
-import { getStatsBreakdown } from '../utils/listing/component.js';
+import { errorEmbed } from '../../utils/embeds.js';
+import { getStatsBreakdown } from '../../utils/listing/component.js';
 import {
   generateDungeonsEmbed,
   generateFarmingEmbed,
   generateKuudraEmbed,
   generateNetworthEmbed,
   generateSkillsEmbed,
-} from '../utils/listing/embed.js';
+} from '../../utils/listing/embed.js';
 
 export default {
   name: 'interactionCreate',
 
   /**
-   * @param {import("../bot/client").default} client
+   * @param {import("../../bot/client.js").default} client
    * @param {import("discord.js").Interaction} interaction
    */
   async execute(client, interaction) {

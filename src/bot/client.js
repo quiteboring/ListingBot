@@ -84,21 +84,27 @@ export default class Bot extends Client {
   async loadEvents() {
     const __filename = fileURLToPath(import.meta.url);
     const __dirname = path.dirname(__filename);
-
     const eventsPath = path.join(__dirname, '../events');
-    const eventFiles = fs
-      .readdirSync(eventsPath)
-      .filter((file) => file.endsWith('.js'));
 
-    for (const file of eventFiles) {
-      const filePath = path.join(eventsPath, file);
-      const event = await import(`file://${filePath}`);
+    const readEvents = async (dir) => {
+      const files = fs.readdirSync(dir);
+      for (const file of files) {
+        const filePath = path.join(dir, file);
+        const stat = fs.statSync(filePath);
+        if (stat.isDirectory()) {
+          await readEvents(filePath);
+        } else if (file.endsWith('.js')) {
+          const event = await import(`file://${filePath}`);
+          this.on(
+            event.default.name,
+            async (...args) =>
+              await event.default.execute(this, ...args),
+          );
+        }
+      }
+    };
 
-      this.on(
-        event.default.name,
-        async (...args) => await event.default.execute(this, ...args),
-      );
-    }
+    await readEvents(eventsPath);
   }
 
   async start() {

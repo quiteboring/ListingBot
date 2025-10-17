@@ -8,5 +8,9 @@ export default {
    */
   async execute(client) {
     logger.info(`Ready! Logged in as ${client.user.tag}`);
+
+    client.user.setPresence({
+      status: 'dnd',
+    });
   },
 };

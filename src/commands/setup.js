@@ -1,4 +1,14 @@
-import { MessageFlags, SlashCommandBuilder } from 'discord.js';
+import {
+  ActionRowBuilder,
+  ButtonBuilder,
+  ButtonStyle,
+  ChannelSelectMenuBuilder,
+  ChannelType,
+  EmbedBuilder,
+  MessageFlags,
+  PermissionFlagsBits,
+  SlashCommandBuilder,
+} from 'discord.js';
 import {
   errorEmbed,
   infoEmbed,
@@ -8,11 +18,13 @@ import { logger } from '../utils/logger.js';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs/promises';
+import colors from '../colors.js';
 
 export default {
   data: new SlashCommandBuilder()
     .setName('setup')
     .setDescription('Setup your server with a user friendly wizard!')
+    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
     .addSubcommand((sub) =>
       sub
         .setName('emojis')
@@ -147,8 +159,31 @@ export default {
    * @param {import('discord.js').ChatInputCommandInteraction} interaction
    */
   async setupWizard(client, interaction) {
-    await interaction.reply({
-      embeds: [errorEmbed('Command not configured yet.')],
+    const embed = new EmbedBuilder()
+      .setTitle('Step 1/4 Select the ticket category')
+      .setDescription(
+        'The selected category is where tickets will be created.\n\nUse the dropdown to select a category.\n\n_Not seeing it? Try searching in the dropdown._',
+      )
+      .setColor(colors.mainColor);
+
+    const selector = new ActionRowBuilder().addComponents(
+      new ChannelSelectMenuBuilder()
+        .setCustomId('setup:ticket_category')
+        .setPlaceholder('Select a category')
+        .setMaxValues(1)
+        .setChannelTypes(ChannelType.GuildCategory),
+    );
+
+    const confirm = new ActionRowBuilder().addComponents(
+      new ButtonBuilder()
+        .setCustomId('setup:confirm')
+        .setLabel('Confirm')
+        .setStyle(ButtonStyle.Success),
+    );
+
+    return interaction.reply({
+      embeds: [embed],
+      components: [selector, confirm],
       flags: MessageFlags.Ephemeral,
     });
   },

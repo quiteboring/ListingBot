@@ -8,6 +8,7 @@ import {
 import { errorEmbed } from '../utils/embeds.js';
 import { generateMainEmbed } from '../utils/listing/embed.js';
 import { getStatsBreakdown } from '../utils/listing/component.js';
+import { isSeller } from '../utils/checks.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -24,6 +25,15 @@ export default {
    * @param {import('discord.js').ChatInputCommandInteraction} interaction
    */
   async execute(client, interaction) {
+    if (!isSeller(interaction.member)) {
+      return await interaction.reply({
+        embeds: [
+          errorEmbed('Insufficient permissions to use this command.'),
+        ],
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
     try {
       await interaction.deferReply();
 

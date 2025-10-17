@@ -10,6 +10,11 @@ export default {
    */
   async execute(client, interaction) {
     if (!interaction.isCommand()) return;
+    if (!interaction.inGuild())
+      return interaction.reply({
+        content: 'This command can only be used in a server.',
+        flags: MessageFlags.Ephemeral,
+      });
 
     const command = client.commands.get(interaction.commandName);
     if (!command) return;
