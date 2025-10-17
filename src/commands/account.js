@@ -3,7 +3,6 @@ import {
   ButtonBuilder,
   ButtonStyle,
   MessageFlags,
-  PermissionFlagsBits,
   SlashCommandBuilder,
 } from 'discord.js';
 import { errorEmbed } from '../utils/embeds.js';
@@ -12,9 +11,13 @@ import { getStatsBreakdown } from '../utils/listing/component.js';
 
 export default {
   data: new SlashCommandBuilder()
-    .setName('account')
-    .setDescription('View account details!')
-    .setDefaultMemberPermissions(PermissionFlagsBits.Administrator),
+    .setName('list')
+    .setDescription('List an account!')
+    .addStringOption((opt) =>
+      opt
+        .setName('ign')
+        .setDescription('The IGN (ex: 56ms) of the account.'),
+    ),
 
   /**
    * @param {import('../bot/client.js').default} client
@@ -22,7 +25,9 @@ export default {
    */
   async execute(client, interaction) {
     try {
-      const ign = '56ms';
+      await interaction.deferReply();
+
+      const ign = interaction.options.getString('ign');
 
       const listings =
         (await client.db.get(`listings_${interaction.guild.id}`)) ||
@@ -42,10 +47,9 @@ export default {
           .setLabel('Unlist'),
       );
 
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [embed],
         components: [row, secondRow],
-        withResponse: true,
       });
 
       const msg = await interaction.fetchReply();
@@ -63,7 +67,7 @@ export default {
     } catch (err) {
       console.log(err);
 
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [errorEmbed('Error: ' + err)],
         flags: MessageFlags.Ephemeral,
       });

@@ -39,10 +39,10 @@ export const getRank = async (apiKey, uuid) => {
   } else if (player.rank && 'NORMAL' !== player.rank) {
     switch (player.rank) {
       case 'YOUTUBER':
-        rank = '[YouTuber]';
+        rank = '**` YouTuber `**';
         break;
       default:
-        rank = '[Non]';
+        rank = '**` Non `**';
         break;
     }
   } else {
@@ -51,24 +51,24 @@ export const getRank = async (apiKey, uuid) => {
         rank =
           player.monthlyPackageRank &&
           'SUPERSTAR' === player.monthlyPackageRank
-            ? '[Mvp++]'
-            : '[Mvp+]';
+            ? '**` Mvp++ `**'
+            : '**` Mvp+ `**';
         break;
       case 'MVP':
-        rank = '[Mvp]';
+        rank = '**` Mvp `**';
         break;
       case 'VIP_PLUS':
-        rank = '[Vip+]';
+        rank = '**` Vip+ `**';
         break;
       case 'VIP':
-        rank = '[Vip]';
+        rank = '**` Vip `**';
         break;
       default:
         rank =
           player.monthlyPackageRank &&
           'SUPERSTAR' === player.monthlyPackageRank
-            ? '[Mvp++]'
-            : '[Non]';
+            ? '**` Mvp++ `**'
+            : '**` Non `**';
     }
   }
 

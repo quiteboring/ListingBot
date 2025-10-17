@@ -341,6 +341,10 @@ export const generateNetworthEmbed = async (
   }
 
   if (networth) {
+    embed.setDescription(
+      `**Total Networth:** ${formatNumber(networth.networth ?? 0)}\n**Unsoulbound Networth:** ${formatNumber(networth.unsoulboundNetworth ?? 0)}`,
+    );
+
     embed.addFields([
       {
         name: `${showEmoji(emojis, 'gold')}Purse`,
@@ -374,7 +378,7 @@ export const generateNetworthEmbed = async (
       .slice(0, 5)
       .map(
         (item) =>
-          `${item.name ? item.name : 'Unknown'} (${formatNumber(item.price)})`,
+          `${item.name ? item.name : 'Unknown'} (**${formatNumber(item.price)}**)`,
       )
       .join('\n');
   }
