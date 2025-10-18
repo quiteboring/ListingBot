@@ -32,18 +32,13 @@ export default {
     )
     .addSubcommand((sub) =>
       sub
-        .setName('sell')
-        .setDescription('Create a sell panel!')
-        .addStringOption((opt) =>
-          opt
-            .setName('type')
-            .setDescription('The type to sell in the panel.')
-            .setRequired(true)
-            .addChoices(
-              { name: 'Profile', value: 'Profile' },
-              { name: 'Account', value: 'Account' },
-            ),
-        ),
+        .setName('sell_account')
+        .setDescription('Create a sell account panel!'),
+    )
+    .addSubcommand((sub) =>
+      sub
+        .setName('edit')
+        .setDescription('Edit panels!')
     ),
 
   /**
@@ -76,8 +71,8 @@ export default {
       case 'mfa':
         await this.createMfaPanel(client, interaction);
         break;
-      case 'sell':
-        await this.createSellPanel(client, interaction);
+      case 'sell_account':
+        await this.createSellAccountPanel(client, interaction);
         break;
       default:
         return await interaction.reply({
@@ -100,9 +95,14 @@ export default {
 
     const components = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId('open_ticket:coin')
-        .setEmoji('🪙')
-        .setLabel('Open Ticket')
+        .setCustomId('open_ticket:buy_coins')
+        .setEmoji('🛒')
+        .setLabel('Buy Coins')
+        .setStyle(ButtonStyle.Secondary),
+      new ButtonBuilder()
+        .setCustomId('open_ticket:sell_coins')
+        .setEmoji('💵')
+        .setLabel('Sell Coins')
         .setStyle(ButtonStyle.Secondary),
     );
 
@@ -173,18 +173,18 @@ export default {
   },
 
   async createSellPanel(client, interaction) {
-    const type = interaction.options.getString('type');
     const embed = new EmbedBuilder()
-      .setTitle(`Sell ${type} Panel`)
+      .setTitle(`Sell Account Panel`)
       .setDescription(
-        `To sell a ${type}, press the button below to open a ticket.`,
+        `To sell an account, press the button below to open a ticket.`,
       )
       .setColor(colors.mainColor);
+      
     const components = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
-        .setCustomId(`open_ticket:sell_${type.toLowerCase()}`)
+        .setCustomId(`open_ticket:sell_account`)
         .setEmoji('💰')
-        .setLabel(`Sell ${type}`)
+        .setLabel(`Sell Account`)
         .setStyle(ButtonStyle.Secondary),
     );
 

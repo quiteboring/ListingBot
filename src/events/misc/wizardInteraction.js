@@ -51,7 +51,7 @@ export default {
 
     if (!interaction.isButton()) return;
     if (interaction.customId !== 'setup:confirm') return;
-    
+
     const value = data.get(
       `${interaction.message.id}_${interaction.user.id}`,
     );
@@ -82,14 +82,6 @@ export default {
           value.values,
         );
         break;
-      case 'profile_category':
-        await this.updateProfileCategory(
-          client,
-          interaction,
-          value.values,
-        );
-        
-        break;
       case 'seller_roles':
         return await this.updateSellerRoles(
           client,
@@ -105,7 +97,7 @@ export default {
     settings.ticket_category = values[0];
 
     const embed = new EmbedBuilder()
-      .setTitle('Step 2/4 Select the account category')
+      .setTitle('Step 2/3 Select the account category')
       .setDescription(
         'The selected category is where accounts will be listed.\n\nUse the dropdown to select a category.\n\n_Not seeing it? Try searching in the dropdown._',
       )
@@ -126,10 +118,7 @@ export default {
       components: [selector, confirm],
     });
 
-    await client.db.set(
-      `guild_${interaction.guild.id}`,
-      settings,
-    );
+    await client.db.set(`guild_${interaction.guild.id}`, settings);
   },
 
   async updateAccountCategory(client, interaction, values) {
@@ -138,40 +127,7 @@ export default {
     settings.account_category = values[0];
 
     const embed = new EmbedBuilder()
-      .setTitle('Step 3/4 Select the profile category')
-      .setDescription(
-        'The selected category is where profiles will be listed.\n\nUse the dropdown to select a category.\n\n_Not seeing it? Try searching in the dropdown._',
-      )
-      .setColor(colors.mainColor);
-
-    const selector = new ActionRowBuilder().addComponents(
-      new ChannelSelectMenuBuilder()
-        .setCustomId('setup:profile_category')
-        .setPlaceholder('Select a category')
-        .setMaxValues(1)
-        .setChannelTypes(ChannelType.GuildCategory),
-    );
-
-    const confirm = interaction.message.components[1];
-
-    await interaction.update({
-      embeds: [embed],
-      components: [selector, confirm],
-    });
-
-    await client.db.set(
-      `guild_${interaction.guild.id}`,
-      settings,
-    );
-  },
-
-  async updateProfileCategory(client, interaction, values) {
-    const settings =
-      (await client.db.get(`guild_${interaction.guild.id}`)) || {};
-    settings.profile_category = values[0];
-
-    const embed = new EmbedBuilder()
-      .setTitle('Step 4/4 Select seller roles')
+      .setTitle('Step 3/3 Select seller roles')
       .setDescription(
         'Select the roles that will have seller permissions.\n\nUse the dropdown to select roles.\n\n_Not seeing it? Try searching in the dropdown._',
       )
@@ -190,10 +146,7 @@ export default {
       components: [selector, confirm],
     });
 
-    await client.db.set(
-      `guild_${interaction.guild.id}`,
-      settings,
-    );
+    await client.db.set(`guild_${interaction.guild.id}`, settings);
   },
 
   async updateSellerRoles(client, interaction, values) {
@@ -206,9 +159,6 @@ export default {
       components: [],
     });
 
-    await client.db.set(
-      `guild_${interaction.guild.id}`,
-      settings,
-    );
+    await client.db.set(`guild_${interaction.guild.id}`, settings);
   },
 };
