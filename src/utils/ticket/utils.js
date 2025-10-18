@@ -85,14 +85,12 @@ export const createTicket = async (
 
   const tos = setup?.tos || '';
 
-  if (!tos || tos.length === 0) 
-    return channel;
+  if (!tos || tos.length === 0) return channel;
 
   const users = tos?.users || [];
   const hasAccepted = users.includes(interaction.user.id);
 
-  if (hasAccepted)
-    return channel;
+  if (hasAccepted) return channel;
 
   const commands = await client.application.commands.fetch();
   const termsCommand = commands.find((c) => c.name === 'tos');

@@ -53,13 +53,15 @@ export default {
 
         await interaction.reply({
           embeds: [embed],
-          components: [new ActionRowBuilder().addComponents(
-            new ButtonBuilder()
-              .setCustomId('tos:accept')
-              .setLabel(hasAccepted ? 'Accepted' : 'Accept Terms')
-              .setStyle(ButtonStyle.Success)
-              .setDisabled(hasAccepted),
-          )],
+          components: [
+            new ActionRowBuilder().addComponents(
+              new ButtonBuilder()
+                .setCustomId('tos:accept')
+                .setLabel(hasAccepted ? 'Accepted' : 'Accept Terms')
+                .setStyle(ButtonStyle.Success)
+                .setDisabled(hasAccepted),
+            ),
+          ],
           flags: MessageFlags.Ephemeral,
         });
         break;

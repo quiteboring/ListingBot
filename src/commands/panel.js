@@ -36,9 +36,7 @@ export default {
         .setDescription('Create a sell account panel!'),
     )
     .addSubcommand((sub) =>
-      sub
-        .setName('edit')
-        .setDescription('Edit panels!')
+      sub.setName('edit').setDescription('Edit panels!'),
     ),
 
   /**
@@ -179,7 +177,7 @@ export default {
         `To sell an account, press the button below to open a ticket.`,
       )
       .setColor(colors.mainColor);
-      
+
     const components = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
         .setCustomId(`open_ticket:sell_account`)

@@ -75,8 +75,22 @@ export default {
           value.values,
         );
         break;
+      case 'ticket_category':
+        await this.updateTicketCategory(
+          client,
+          interaction,
+          value.values,
+        );
+        break;
       case 'account_category':
         await this.updateAccountCategory(
+          client,
+          interaction,
+          value.values,
+        );
+        break;
+      case 'vouch_channel':
+        await this.updateVouchChannel(
           client,
           interaction,
           value.values,
@@ -127,7 +141,35 @@ export default {
     settings.account_category = values[0];
 
     const embed = new EmbedBuilder()
-      .setTitle('Step 3/3 Select seller roles')
+      .setTitle('Step 3/4 Select vouch channel')
+      .setDescription(
+        'Select the channel that will be used for vouching.\n\nUse the dropdown to select a channel.\n\n_Not seeing it? Try searching in the dropdown._',
+      )
+      .setColor(colors.mainColor);
+
+    const selector = new ActionRowBuilder().addComponents(
+      new ChannelSelectMenuBuilder()
+        .setCustomId('setup:vouch_channel')
+        .setPlaceholder('Select channel'),
+    );
+
+    const confirm = interaction.message.components[1];
+
+    await interaction.update({
+      embeds: [embed],
+      components: [selector, confirm],
+    });
+
+    await client.db.set(`guild_${interaction.guild.id}`, settings);
+  },
+
+  async updateVouchChannel(client, interaction, values) {
+    const settings =
+      (await client.db.get(`guild_${interaction.guild.id}`)) || {};
+    settings.vouch_channel = values[0];
+
+    const embed = new EmbedBuilder()
+      .setTitle('Step 4/4 Select seller roles')
       .setDescription(
         'Select the roles that will have seller permissions.\n\nUse the dropdown to select roles.\n\n_Not seeing it? Try searching in the dropdown._',
       )

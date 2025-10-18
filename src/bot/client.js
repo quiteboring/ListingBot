@@ -2,6 +2,7 @@ import {
   Client,
   Collection,
   GatewayIntentBits,
+  Partials,
   REST,
   Routes,
 } from 'discord.js';
@@ -23,8 +24,11 @@ export default class Bot extends Client {
         GatewayIntentBits.Guilds,
         GatewayIntentBits.GuildMembers,
         GatewayIntentBits.MessageContent,
+        GatewayIntentBits.GuildMessages,
+        GatewayIntentBits.DirectMessages,
         GatewayIntentBits.DirectMessageTyping,
       ],
+      partials: [Partials.Channel],
     });
 
     this.token = token;
@@ -95,6 +99,7 @@ export default class Bot extends Client {
           await readEvents(filePath);
         } else if (file.endsWith('.js')) {
           const event = await import(`file://${filePath}`);
+
           this.on(
             event.default.name,
             async (...args) =>

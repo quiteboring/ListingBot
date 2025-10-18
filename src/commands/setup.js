@@ -160,7 +160,7 @@ export default {
    */
   async setupWizard(client, interaction) {
     const embed = new EmbedBuilder()
-      .setTitle('Step 1/3 Select the ticket category')
+      .setTitle('Step 1/4 Select the ticket category')
       .setDescription(
         'The selected category is where tickets will be created.\n\nUse the dropdown to select a category.\n\n_Not seeing it? Try searching in the dropdown._',
       )

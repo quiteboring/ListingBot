@@ -9,7 +9,10 @@ export default {
    * @param {import("discord.js").Interaction} interaction
    */
   async execute(client, interaction) {
-    if (!interaction.customId || !interaction.customId.startsWith('tos:'))
+    if (
+      !interaction.customId ||
+      !interaction.customId.startsWith('tos:')
+    )
       return;
 
     const type = interaction.customId.split(':')[1];
@@ -18,12 +21,16 @@ export default {
       case 'edit':
         const tos = interaction.fields.getTextInputValue('tos');
         const guildData =
-          (await client.db.get(`guild_${interaction.guild.id}`)) || {};
+          (await client.db.get(`guild_${interaction.guild.id}`)) ||
+          {};
 
         guildData.tos.message = tos;
         guildData.tos.users = [];
 
-        await client.db.set(`guild_${interaction.guild.id}`, guildData);
+        await client.db.set(
+          `guild_${interaction.guild.id}`,
+          guildData,
+        );
 
         await interaction.reply({
           embeds: [
@@ -34,7 +41,8 @@ export default {
         break;
       case 'accept':
         const guild =
-          (await client.db.get(`guild_${interaction.guild.id}`)) || {};
+          (await client.db.get(`guild_${interaction.guild.id}`)) ||
+          {};
 
         if (!guild.tos) {
           await interaction.reply({
