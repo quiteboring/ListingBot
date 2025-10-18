@@ -225,13 +225,6 @@ export default {
     );
   },
 
-  /**
-   *
-   * @param {*} client
-   * @param {import('discord.js').Interaction} interaction
-   * @param {*} category
-   * @returns
-   */
   async handleMiddleman(client, interaction, category) {
     if (interaction.isButton()) {
       return await createModal(client, interaction, [
