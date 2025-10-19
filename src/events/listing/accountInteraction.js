@@ -25,8 +25,9 @@ export default {
 
     const [, id] = interaction.customId.split(':');
     const msgId = id === '-1' ? interaction.message.id : id;
-    const listings =
-      (await client.db.get(`listings_${interaction.guild.id}`)) || [];
+    const setup =
+      (await client.db.get(`guild_${interaction.guild.id}`)) || {};
+    const listings = setup?.listings || [];
 
     const data = listings.find(
       (item) =>

@@ -125,11 +125,6 @@ export default {
       )
       .addFields([
         {
-          name: 'Status',
-          value: 'Waiting for support...',
-          inline: true,
-        },
-        {
           name: 'IGN',
           value: interaction.fields.getTextInputValue('ign'),
           inline: true,
@@ -192,11 +187,6 @@ export default {
         'Thank you for reaching out to sell coins! Our team will assist you shortly.',
       )
       .addFields([
-        {
-          name: 'Status',
-          value: 'Waiting for support...',
-          inline: true,
-        },
         {
           name: 'IGN',
           value: interaction.fields.getTextInputValue('ign'),
@@ -411,11 +401,6 @@ export default {
         'Thank you for reaching out to sell your account! Our team will assist you shortly.',
       )
       .addFields([
-        {
-          name: 'Status',
-          value: 'Waiting for support...',
-          inline: true,
-        },
         {
           name: 'IGN',
           value: ign,

@@ -146,7 +146,7 @@ export default {
         .setEmoji('🔒')
         .setStyle(ButtonStyle.Danger),
     );
-  
+
     await interaction.message.edit({
       components: [components],
     });
@@ -243,8 +243,10 @@ export default {
 
     ticket.status = 'open';
     tickets.push(ticket);
-    
-    const message = await interaction.channel.messages.fetch(ticket.messageId);
+
+    const message = await interaction.channel.messages.fetch(
+      ticket.messageId,
+    );
 
     const components = new ActionRowBuilder().addComponents(
       new ButtonBuilder()
@@ -258,7 +260,7 @@ export default {
         .setEmoji('🔒')
         .setStyle(ButtonStyle.Danger),
     );
-  
+
     await message.edit({
       components: [components],
     });

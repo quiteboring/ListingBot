@@ -1,14 +1,8 @@
-import {
-  ActionRowBuilder,
-  ButtonBuilder,
-  ButtonStyle,
-  MessageFlags,
-  SlashCommandBuilder,
-} from 'discord.js';
-import { errorEmbed } from '../utils/embeds.js';
+import { MessageFlags, SlashCommandBuilder } from 'discord.js';
+import { errorEmbed, successEmbed } from '../utils/embeds.js';
 import { generateMainEmbed } from '../utils/listing/embed.js';
-import { getStatsBreakdown } from '../utils/listing/component.js';
 import { isSeller } from '../utils/checks.js';
+import { createListing } from '../utils/listing/utils.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -18,6 +12,11 @@ export default {
       opt
         .setName('ign')
         .setDescription('The IGN (ex: 56ms) of the account.'),
+    )
+    .addStringOption((opt) =>
+      opt
+        .setName('price')
+        .setDescription('The listing price of the account.'),
     ),
 
   /**
@@ -25,7 +24,7 @@ export default {
    * @param {import('discord.js').ChatInputCommandInteraction} interaction
    */
   async execute(client, interaction) {
-    if (!isSeller(interaction.member)) {
+    if (!isSeller(client, interaction.member)) {
       return await interaction.reply({
         embeds: [
           errorEmbed('Insufficient permissions to use this command.'),
@@ -34,50 +33,66 @@ export default {
       });
     }
 
+    const ign = interaction.options.getString('ign');
+    const price = interaction.options.getString('price');
+
     try {
-      await interaction.deferReply();
+      const setup =
+        (await client.db.get(`guild_${interaction.guild.id}`)) || {};
 
-      const ign = interaction.options.getString('ign');
+      const category = setup.account_category;
 
-      const listings =
-        (await client.db.get(`listings_${interaction.guild.id}`)) ||
-        [];
+      if (!category) {
+        return await interaction.reply({
+          embeds: [
+            errorEmbed(
+              'Listing category is not set up. Please contact an administrator.',
+            ),
+          ],
+          flags: MessageFlags.Ephemeral,
+        });
+      }
 
       const embed = await generateMainEmbed(client, interaction, ign);
-      const row = await getStatsBreakdown(client);
-      const secondRow = new ActionRowBuilder().addComponents(
-        new ButtonBuilder()
-          .setCustomId('buy_account')
-          .setStyle(ButtonStyle.Secondary)
-          .setLabel('Buy Account')
-          .setEmoji('💸'),
-        new ButtonBuilder()
-          .setCustomId('unlist_account')
-          .setStyle(ButtonStyle.Danger)
-          .setLabel('Unlist'),
+      const paymentMethod = (await client.db.get(
+        `user_${interaction.user.id}_payment_methods`,
+      )) || 'Unknown';
+
+      embed.addFields([
+        {
+          name: '',
+          value: '',
+          inline: true,
+        },
+        {
+          name: '💵 Price',
+          value: price,
+          inline: true,
+        },
+        {
+          name: '💳 Payment Methods',
+          value: paymentMethod,
+          inline: true,
+        },
+      ]);
+
+      await createListing(
+        client,
+        interaction,
+        category,
+        ign,
+        price,
+        embed,
       );
 
-      await interaction.editReply({
-        embeds: [embed],
-        components: [row, secondRow],
+      await interaction.reply({
+        embeds: [successEmbed('Account listed successfully!')],
+        flags: MessageFlags.Ephemeral,
       });
-
-      const msg = await interaction.fetchReply();
-
-      listings.push({
-        messageId: msg.id,
-        channelId: interaction.channel.id,
-        ign: ign,
-      });
-
-      await client.db.set(
-        `listings_${interaction.guild.id}`,
-        listings,
-      );
     } catch (err) {
       console.log(err);
 
-      await interaction.editReply({
+      await interaction.reply({
         embeds: [errorEmbed('Error: ' + err)],
         flags: MessageFlags.Ephemeral,
       });

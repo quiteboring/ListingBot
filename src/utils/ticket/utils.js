@@ -23,7 +23,7 @@ export const createTicket = async (
   const sellers = setup.seller_roles || [];
 
   const channel = await interaction.guild.channels.create({
-    name: `${name}\u2502${interaction.user.username}`,
+    name: `🎟️\u2502${name}\u2502${interaction.user.username}`,
     type: ChannelType.GuildText,
     parent: category,
     permissionOverwrites: [
