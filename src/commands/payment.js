@@ -9,7 +9,7 @@ import {
 } from 'discord.js';
 import { errorEmbed } from '../utils/embeds.js';
 import { isSeller } from '../utils/checks.js';
-import colors from '../colors.js';
+import colors from '../utils/colors.js';
 
 export default {
   data: new SlashCommandBuilder()

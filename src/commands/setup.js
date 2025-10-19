@@ -18,7 +18,7 @@ import { logger } from '../utils/logger.js';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import fs from 'node:fs/promises';
-import colors from '../colors.js';
+import colors from '../utils/colors.js';
 
 export default {
   data: new SlashCommandBuilder()

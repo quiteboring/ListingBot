@@ -6,7 +6,7 @@ import {
   EmbedBuilder,
   RoleSelectMenuBuilder,
 } from 'discord.js';
-import colors from '../../colors.js';
+import colors from '../../utils/colors.js';
 import { successEmbed } from '../../utils/embeds.js';
 
 const data = new Collection();

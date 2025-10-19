@@ -10,7 +10,7 @@ import {
   createModal,
   createTicket,
 } from '../../utils/ticket/utils.js';
-import colors from '../../colors.js';
+import colors from '../../utils/colors.js';
 
 const separator = {
   name: '',

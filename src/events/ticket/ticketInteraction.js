@@ -8,7 +8,7 @@ import {
 } from 'discord.js';
 import { isAdmin, isSeller } from '../../utils/checks.js';
 import { createTranscript } from 'discord-html-transcripts';
-import colors from '../../colors.js';
+import colors from '../../utils/colors.js';
 import { errorEmbed, successEmbed } from '../../utils/embeds.js';
 
 export default {

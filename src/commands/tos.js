@@ -9,7 +9,7 @@ import {
   TextInputBuilder,
   TextInputStyle,
 } from 'discord.js';
-import colors from '../colors.js';
+import colors from '../utils/colors.js';
 
 export default {
   data: new SlashCommandBuilder()

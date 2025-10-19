@@ -2,7 +2,7 @@ import { EmbedBuilder, MessageFlags } from 'discord.js';
 import { isAdmin } from '../../utils/checks.js';
 import { errorEmbed } from '../../utils/embeds.js';
 import { createTicket } from '../../utils/ticket/utils.js';
-import colors from '../../colors.js';
+import colors from '../../utils/colors.js';
 
 export default {
   name: 'interactionCreate',
