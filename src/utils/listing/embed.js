@@ -17,7 +17,7 @@ import { getDungeons } from '../../api/stats/dungeons.js';
 import { getSBLevel } from '../../api/stats/player.js';
 import { formatNumber, titleCase } from '../format.js';
 import { getRank } from '../../api/functions/getRank.js';
-import colors from '../utils/colors.js';
+import colors from '../colors.js';
 import {
   getCrimsonIsle,
   getKuudra,

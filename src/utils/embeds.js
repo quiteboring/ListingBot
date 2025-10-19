@@ -1,4 +1,4 @@
-import colors from './utils/colors.js';
+import colors from './colors.js';
 import { EmbedBuilder } from 'discord.js';
 
 export const mainEmbed = (description) => {
