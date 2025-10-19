@@ -33,6 +33,8 @@ export default {
       });
     }
 
+    await interaction.deferReply({ flags: MessageFlags.Ephemeral });
+
     const ign = interaction.options.getString('ign');
     const price = interaction.options.getString('price');
 
@@ -43,20 +45,20 @@ export default {
       const category = setup.account_category;
 
       if (!category) {
-        return await interaction.reply({
+        return await interaction.editReply({
           embeds: [
             errorEmbed(
               'Listing category is not set up. Please contact an administrator.',
             ),
           ],
-          flags: MessageFlags.Ephemeral,
         });
       }
 
       const embed = await generateMainEmbed(client, interaction, ign);
-      const paymentMethod = (await client.db.get(
-        `user_${interaction.user.id}_payment_methods`,
-      )) || 'Unknown';
+      const paymentMethod =
+        (await client.db.get(
+          `user_${interaction.user.id}_payment_methods`,
+        )) || 'Unknown';
 
       embed.addFields([
         {
@@ -85,16 +87,14 @@ export default {
         embed,
       );
 
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [successEmbed('Account listed successfully!')],
-        flags: MessageFlags.Ephemeral,
       });
     } catch (err) {
       console.log(err);
 
-      await interaction.reply({
+      await interaction.editReply({
         embeds: [errorEmbed('Error: ' + err)],
-        flags: MessageFlags.Ephemeral,
       });
     }
   },

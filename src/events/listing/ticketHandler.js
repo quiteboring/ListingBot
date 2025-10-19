@@ -1,8 +1,8 @@
-import { EmbedBuilder, MessageFlags } from "discord.js";
-import { isAdmin } from "../../utils/checks.js";
-import { errorEmbed } from "../../utils/embeds.js";
-import { createTicket } from "../../utils/ticket/utils.js";
-import colors from "../../colors.js";
+import { EmbedBuilder, MessageFlags } from 'discord.js';
+import { isAdmin } from '../../utils/checks.js';
+import { errorEmbed } from '../../utils/embeds.js';
+import { createTicket } from '../../utils/ticket/utils.js';
+import colors from '../../colors.js';
 
 export default {
   name: 'interactionCreate',
@@ -26,9 +26,10 @@ export default {
   },
 
   async handleBuyAccount(client, interaction) {
-    const setup = (await client.db.get(`guild_${interaction.guild.id}`)) || {};
+    const setup =
+      (await client.db.get(`guild_${interaction.guild.id}`)) || {};
     const category = setup.ticket_category;
-    
+
     if (!category) {
       return await interaction.reply({
         embeds: [
@@ -54,17 +55,22 @@ export default {
       .setColor(colors.mainColor)
       .setTimestamp();
 
-    await createTicket(
+    const channel = await createTicket(
       client,
       interaction,
       category,
       'account',
       embed,
     );
+
+    await channel.send({
+      embeds: [interaction.message.embeds[0]],
+    });
   },
 
   async handleUnlist(client, interaction) {
-    const setup = (await client.db.get(`guild_${interaction.guild.id}`)) || {};
+    const setup =
+      (await client.db.get(`guild_${interaction.guild.id}`)) || {};
     const listings = setup?.listings || [];
     const listing = listings.find(
       (item) =>
@@ -97,7 +103,9 @@ export default {
 
     await interaction.reply({
       embeds: [
-        errorEmbed('Account unlisted successfully. Deleting channel in 3 seconds...'),
+        errorEmbed(
+          'Account unlisted successfully. Deleting channel in 3 seconds...',
+        ),
       ],
       flags: MessageFlags.Ephemeral,
     });
@@ -105,5 +113,5 @@ export default {
     setTimeout(async () => {
       await interaction.channel.delete();
     }, 3000);
-  }
+  },
 };
