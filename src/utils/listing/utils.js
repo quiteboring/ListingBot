@@ -14,7 +14,6 @@ export const createListing = async (
   ign,
   price,
   embed,
-  content = `<@${interaction.user.id}>`,
 ) => {
   const setup =
     (await client.db.get(`guild_${interaction.guild.id}`)) || {};
@@ -48,7 +47,6 @@ export const createListing = async (
   );
 
   const msg = await channel.send({
-    content: content,
     embeds: [embed],
     components: [row, secondRow],
   });
