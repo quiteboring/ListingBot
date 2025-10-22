@@ -58,7 +58,7 @@ export const generateMainEmbed = async (client, interaction, ign) => {
     .setFields([
       {
         name: 'Rank',
-        value: rank,
+        value: rank || `**\` Non \`**`,
         inline: false,
       },
       {
