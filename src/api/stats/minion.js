@@ -29,22 +29,23 @@ export const getMinionData = (profile) => {
     throw new Error('Invalid profile data: missing members.');
   }
 
-  const uniqueMinionCount = Object.values(profile.members).reduce(
-    (sum, member) =>
-      sum + (member?.player_data?.crafted_generators?.length ?? 0),
-    0,
-  );
+  const members = Object.values(profile.members);
+  let uniqueMinionCount = 0;
+
+  for (const member of members) {
+    if (
+      member &&
+      member.player_data &&
+      Array.isArray(member.player_data.crafted_generators)
+    ) {
+      uniqueMinionCount += member.player_data.crafted_generators.length;
+    }
+  }
 
   let threshold = thresholds
     .slice()
     .reverse()
     .find(([count]) => uniqueMinionCount >= count) ?? thresholds[0];
-
-  if (!threshold) {
-    throw new Error(
-      'Could not determine minion slots from thresholds.',
-    );
-  }
 
   const slots = threshold[1];
   const currentIndex = thresholds.indexOf(threshold);
