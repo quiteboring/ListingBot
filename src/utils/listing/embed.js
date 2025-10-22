@@ -217,7 +217,7 @@ export const generateDungeonsEmbed = async (
     },
   ]);
 
-  for (const [className, classData] of Object.entries(data.classes)) {
+  for (const [className, classData] of Object.entries(data?.classes ?? {})) {
     embed.addFields([
       {
         name: `${showEmoji(className)}${className.charAt(0).toUpperCase() + className.slice(1)}`,
