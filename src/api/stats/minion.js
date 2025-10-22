@@ -25,20 +25,20 @@ const thresholds = [
 ];
 
 export const getMinionData = (profile) => {
-  if (!profile || !profile.members) {
+  if (!profile || !profile?.members) {
     throw new Error('Invalid profile data: missing members.');
   }
 
   const uniqueMinionCount = Object.values(profile.members).reduce(
     (sum, member) =>
-      sum + (member.player_data?.crafted_generators?.length ?? 0),
+      sum + (member?.player_data?.crafted_generators?.length ?? 0),
     0,
   );
 
-  const threshold = thresholds
+  let threshold = thresholds
     .slice()
     .reverse()
-    .find(([count]) => uniqueMinionCount >= count);
+    .find(([count]) => uniqueMinionCount >= count) ?? thresholds[0];
 
   if (!threshold) {
     throw new Error(
@@ -53,18 +53,10 @@ export const getMinionData = (profile) => {
       ? thresholds[currentIndex + 1][0]
       : null;
 
-  if (!profile.community_upgrades?.upgrade_states) {
-    throw new Error(
-      'Invalid profile data: missing community upgrades.',
-    );
-  }
-
-  const communitySlots =
-    profile.community_upgrades.upgrade_states.filter(
-      (upgrade) =>
-        upgrade.upgrade === 'minion_slots' && upgrade.tier > 0,
-    ).length;
-
+  const communitySlots = profile?.community_upgrades?.upgrade_states?.filter(
+    (upgrade) => upgrade.upgrade === 'minion_slots' && upgrade.tier > 0,
+  ).length ?? 0;
+  
   return {
     crafted: slots,
     community: communitySlots,
