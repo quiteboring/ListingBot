@@ -116,7 +116,7 @@ export const generateMainEmbed = async (client, interaction, ign) => {
       },
       {
         name: `${showEmoji(emojis, 'dungeon_skull')}Dungeons`,
-        value: `**Catacombs:** ${dungeons.dungeons.level.toFixed(2)}\n**Class Avg:** ${dungeons.classAverage.toFixed(2)}`,
+        value: `**Catacombs:** ${dungeons?.dungeons?.level?.toFixed(2) ?? 0}\n**Class Avg:** ${dungeons?.classAverage?.toFixed(2) ?? 0}`,
         inline: true,
       },
       {
@@ -213,7 +213,7 @@ export const generateDungeonsEmbed = async (
   embed.addFields([
     {
       name: `${showEmoji('dungeon_skull')}Catacombs`,
-      value: `**Level:** ${data.dungeons.levelWithProgress.toFixed(2)}\n**XP:** ${formatNumber(data.dungeons.xp, 2)}\n**Class Avg:** ${formatNumber(data.classAverage, 2)}`,
+      value: `**Level:** ${data?.dungeons?.levelWithProgress?.toFixed(2) ?? 0}\n**XP:** ${formatNumber(data?.dungeons?.xp ?? 0, 2)}\n**Class Avg:** ${formatNumber(data?.classAverage ?? 0, 2)}`,
     },
   ]);
 
@@ -221,7 +221,7 @@ export const generateDungeonsEmbed = async (
     embed.addFields([
       {
         name: `${showEmoji(className)}${className.charAt(0).toUpperCase() + className.slice(1)}`,
-        value: `**Level:** ${classData.levelWithProgress.toFixed(2)}\n**XP:** ${formatNumber(classData.xp, 2)}`,
+        value: `**Level:** ${classData?.levelWithProgress?.toFixed(2) ?? 0}\n**XP:** ${formatNumber(classData?.xp ?? 0, 2)}`,
         inline: true,
       },
     ]);
