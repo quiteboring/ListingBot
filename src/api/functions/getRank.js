@@ -32,7 +32,7 @@ export const getRank = async (apiKey, uuid) => {
   }
 
   const player = data?.player;
-  let rank = '';
+  let rank = '**` Non `**';
 
   if (player.prefix) {
     rank = player.prefix.replace(/§[0-9|a-z]|\[|\]/g, '');
