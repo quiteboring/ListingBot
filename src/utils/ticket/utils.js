@@ -83,9 +83,9 @@ export const createTicket = async (
     tickets,
   });
 
-  const tos = setup?.tos || '';
+  const tos = setup?.tos || {};
 
-  if (!tos || tos.length === 0) return channel;
+  if (!tos || tos?.message?.length === 0) return channel;
 
   const users = tos?.users || [];
   const hasAccepted = users.includes(interaction.user.id);

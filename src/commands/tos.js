@@ -10,6 +10,8 @@ import {
   TextInputStyle,
 } from 'discord.js';
 import colors from '../utils/colors.js';
+import { isSeller } from '../utils/checks.js';
+import { errorEmbed } from '../utils/embeds.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -42,7 +44,7 @@ export default {
           .setTitle('Terms of Service')
           .setDescription(tos?.message || 'No terms of service set.')
           .setFooter({
-            text: `${interaction.guild.name} ToS`,
+            text: `${interaction.guild.name} TOS`,
             iconURL: interaction.guild.iconURL(),
           })
           .setColor(colors.mainColor)
@@ -66,6 +68,15 @@ export default {
         });
         break;
       case 'edit':
+        if (!(await isSeller(client, interaction.member))) {
+          return await interaction.reply({
+            embeds: [
+              errorEmbed('Insufficient permissions to use this command.'),
+            ],
+            flags: MessageFlags.Ephemeral,
+          });
+        }
+
         const modal = new ModalBuilder()
           .setCustomId('tos:edit')
           .setTitle('Edit Terms of Service')
@@ -77,7 +88,7 @@ export default {
                 .setStyle(TextInputStyle.Paragraph)
                 .setPlaceholder('Enter the new terms of service')
                 .setRequired(true)
-                .setValue(guild?.tos || ''),
+                .setValue(guild?.tos?.message || ''),
             ),
           );
 

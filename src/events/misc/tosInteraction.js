@@ -23,13 +23,17 @@ export default {
         const guildData =
           (await client.db.get(`guild_${interaction.guild.id}`)) ||
           {};
+        const guildTos = guildData?.tos || {};
 
-        guildData.tos.message = tos;
-        guildData.tos.users = [];
+        guildTos.message = tos;
+        guildTos.users = [];
 
         await client.db.set(
           `guild_${interaction.guild.id}`,
-          guildData,
+          {
+            tos: guildTos,
+            ...guildData
+          },
         );
 
         await interaction.reply({
