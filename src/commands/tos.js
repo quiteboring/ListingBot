@@ -71,7 +71,9 @@ export default {
         if (!(await isSeller(client, interaction.member))) {
           return await interaction.reply({
             embeds: [
-              errorEmbed('Insufficient permissions to use this command.'),
+              errorEmbed(
+                'Insufficient permissions to use this command.',
+              ),
             ],
             flags: MessageFlags.Ephemeral,
           });

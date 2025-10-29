@@ -96,6 +96,20 @@ export default {
           value.values,
         );
         break;
+      case 'customer_role':
+        await this.updateCustomerRole(
+          client,
+          interaction,
+          value.values,
+        );
+        break;
+      case 'vouch_channel':
+        await this.updateVouchChannel(
+          client,
+          interaction,
+          value.values,
+        );
+        break;
       case 'seller_roles':
         return await this.updateSellerRoles(
           client,
@@ -141,7 +155,35 @@ export default {
     settings.account_category = values[0];
 
     const embed = new EmbedBuilder()
-      .setTitle('Step 3/4 Select vouch channel')
+      .setTitle('Step 3/5 Select customer role')
+      .setDescription(
+        'Select the role that will be given to customers.\n\nUse the dropdown to select a role.\n\n_Not seeing it? Try searching in the dropdown._',
+      )
+      .setColor(colors.mainColor);
+
+    const selector = new ActionRowBuilder().addComponents(
+      new RoleSelectMenuBuilder()
+        .setCustomId('setup:customer_role')
+        .setPlaceholder('Select role'),
+    );
+
+    const confirm = interaction.message.components[1];
+
+    await interaction.update({
+      embeds: [embed],
+      components: [selector, confirm],
+    });
+
+    await client.db.set(`guild_${interaction.guild.id}`, settings);
+  },
+
+  async updateCustomerRole(client, interaction, values) {
+    const settings =
+      (await client.db.get(`guild_${interaction.guild.id}`)) || {};
+    settings.customer_role = values[0];
+
+    const embed = new EmbedBuilder()
+      .setTitle('Step 4/5 Select vouch channel')
       .setDescription(
         'Select the channel that will be used for vouching.\n\nUse the dropdown to select a channel.\n\n_Not seeing it? Try searching in the dropdown._',
       )
@@ -169,7 +211,7 @@ export default {
     settings.vouch_channel = values[0];
 
     const embed = new EmbedBuilder()
-      .setTitle('Step 4/4 Select seller roles')
+      .setTitle('Step 5/5 Select seller roles')
       .setDescription(
         'Select the roles that will have seller permissions.\n\nUse the dropdown to select roles.\n\n_Not seeing it? Try searching in the dropdown._',
       )

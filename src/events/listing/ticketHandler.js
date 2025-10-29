@@ -68,7 +68,7 @@ export default {
       category,
       'account',
       embed,
-      `<@${listing?.sellerId ?? 'unknown'}>, <@${interaction.user.id}> is looking to buy your account!`
+      `<@${listing?.sellerId ?? 'unknown'}>, <@${interaction.user.id}> is looking to buy your account!`,
     );
 
     await channel.send({

@@ -28,13 +28,10 @@ export default {
         guildTos.message = tos;
         guildTos.users = [];
 
-        await client.db.set(
-          `guild_${interaction.guild.id}`,
-          {
-            tos: guildTos,
-            ...guildData
-          },
-        );
+        await client.db.set(`guild_${interaction.guild.id}`, {
+          tos: guildTos,
+          ...guildData,
+        });
 
         await interaction.reply({
           embeds: [

@@ -46,9 +46,7 @@ export default {
     ) {
       return await interaction.reply({
         embeds: [
-          errorEmbed(
-            'You do not have sufficient permissions.',
-          ),
+          errorEmbed('You do not have sufficient permissions.'),
         ],
         flags: MessageFlags.Ephemeral,
       });
