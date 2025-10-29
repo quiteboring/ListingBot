@@ -57,12 +57,11 @@ export default {
         });
       }
 
-      // const uuid = await getUUID(ign);
+      const uuid = await getUUID(ign);
       const embed = await generateMainEmbed(
         client,
         interaction,
-        // uuid,
-        '60e1dbe527774f50830d95fb46018558',
+        uuid,
       );
 
       const paymentMethod =
@@ -92,8 +91,7 @@ export default {
         client,
         interaction,
         category,
-        // uuid,
-        '60e1dbe527774f50830d95fb46018558',
+        uuid,
         price,
         embed,
       );

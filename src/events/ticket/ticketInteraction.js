@@ -47,7 +47,7 @@ export default {
       return await interaction.reply({
         embeds: [
           errorEmbed(
-            'You do not have permissions to close the ticket.',
+            'You do not have sufficient permissions.',
           ),
         ],
         flags: MessageFlags.Ephemeral,
