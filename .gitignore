@@ -3,3 +3,4 @@ test/
 database.sqlite
 
 .env
+.vscode/settings.json

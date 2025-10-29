@@ -8,6 +8,7 @@ import {
   generateNetworthEmbed,
   generateSkillsEmbed,
 } from '../../utils/listing/embed.js';
+import { getRank } from '../../api/functions/getRank.js';
 
 export default {
   name: 'interactionCreate',
@@ -35,7 +36,7 @@ export default {
         item.messageId === msgId,
     );
 
-    let embed = errorEmbed('Unable to find IGN stored in database.');
+    let embed = errorEmbed('Unable to find UUID stored in database.');
 
     if (!data) {
       return await interaction.reply({
@@ -52,35 +53,35 @@ export default {
         embed = await generateSkillsEmbed(
           client,
           interaction,
-          data.ign,
+          data.uuid,
         );
         break;
       case 'dungeons':
         embed = await generateDungeonsEmbed(
           client,
           interaction,
-          data.ign,
+          data.uuid,
         );
         break;
       case 'kuudra':
         embed = await generateKuudraEmbed(
           client,
           interaction,
-          data.ign,
+          data.uuid,
         );
         break;
       case 'farming':
         embed = await generateFarmingEmbed(
           client,
           interaction,
-          data.ign,
+          data.uuid,
         );
         break;
       case 'networth':
         embed = await generateNetworthEmbed(
           client,
           interaction,
-          data.ign,
+          data.uuid,
         );
         break;
     }

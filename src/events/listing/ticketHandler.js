@@ -41,6 +41,13 @@ export default {
       });
     }
 
+    const listings = setup?.listings || [];
+    const listing = listings.find(
+      (item) =>
+        item.channelId === interaction.channel.id &&
+        item.messageId === interaction.message.id,
+    );
+
     const embed = new EmbedBuilder()
       .setTitle('Buy Account Ticket')
       .setDescription(
@@ -61,6 +68,7 @@ export default {
       category,
       'account',
       embed,
+      `<@${listing?.sellerId ?? 'unknown'}>, <@${interaction.user.id}> is looking to buy your account!`
     );
 
     await channel.send({
@@ -79,7 +87,7 @@ export default {
     );
 
     if (
-      interaction.user.id !== listing.sellerId ||
+      interaction.user.id !== listing.sellerId &&
       !isAdmin(interaction.member)
     ) {
       return await interaction.reply({

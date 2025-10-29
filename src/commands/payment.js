@@ -23,7 +23,7 @@ export default {
   async execute(client, interaction) {
     const emojis = (await client.db.get(`emojis`)) || {};
 
-    if (!isSeller(client, interaction.member)) {
+    if (!(await isSeller(client, interaction.member))) {
       await interaction.reply({
         embeds: [
           errorEmbed('Insufficient permissions to use this command.'),

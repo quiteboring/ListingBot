@@ -3,6 +3,7 @@ import { errorEmbed, successEmbed } from '../utils/embeds.js';
 import { generateMainEmbed } from '../utils/listing/embed.js';
 import { isSeller } from '../utils/checks.js';
 import { createListing } from '../utils/listing/utils.js';
+import { getUUID } from '../api/functions/getUUID.js';
 
 export default {
   data: new SlashCommandBuilder()
@@ -11,12 +12,14 @@ export default {
     .addStringOption((opt) =>
       opt
         .setName('ign')
-        .setDescription('The IGN (ex: 56ms) of the account.'),
+        .setDescription('The IGN (ex: 56ms) of the account.')
+        .setRequired(true),
     )
-    .addStringOption((opt) =>
+    .addIntegerOption((opt) =>
       opt
         .setName('price')
-        .setDescription('The listing price of the account.'),
+        .setDescription('The listing price of the account.')
+        .setRequired(true),
     ),
 
   /**
@@ -24,7 +27,7 @@ export default {
    * @param {import('discord.js').ChatInputCommandInteraction} interaction
    */
   async execute(client, interaction) {
-    if (!isSeller(client, interaction.member)) {
+    if (!(await isSeller(client, interaction.member))) {
       return await interaction.reply({
         embeds: [
           errorEmbed('Insufficient permissions to use this command.'),
@@ -36,7 +39,7 @@ export default {
     await interaction.deferReply({ flags: MessageFlags.Ephemeral });
 
     const ign = interaction.options.getString('ign');
-    const price = interaction.options.getString('price');
+    const price = `$${interaction.options.getInteger('price')}`;
 
     try {
       const setup =
@@ -54,7 +57,14 @@ export default {
         });
       }
 
-      const embed = await generateMainEmbed(client, interaction, ign);
+      // const uuid = await getUUID(ign);
+      const embed = await generateMainEmbed(
+        client,
+        interaction,
+        // uuid,
+        '60e1dbe527774f50830d95fb46018558',
+      );
+
       const paymentMethod =
         (await client.db.get(
           `user_${interaction.user.id}_payment_methods`,
@@ -82,7 +92,8 @@ export default {
         client,
         interaction,
         category,
-        ign,
+        // uuid,
+        '60e1dbe527774f50830d95fb46018558',
         price,
         embed,
       );
@@ -94,7 +105,7 @@ export default {
       console.log(err);
 
       await interaction.editReply({
-        embeds: [errorEmbed('Error: ' + err)],
+        embeds: [errorEmbed(err)],
       });
     }
   },

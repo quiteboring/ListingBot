@@ -41,7 +41,7 @@ export default {
     }
 
     if (
-      !isSeller(client, interaction.member) &&
+      !(await isSeller(client, interaction.member)) &&
       !isAdmin(interaction.member)
     ) {
       return await interaction.reply({

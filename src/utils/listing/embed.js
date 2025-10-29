@@ -27,10 +27,12 @@ const showEmoji = (emojis, name) => {
   return emojis[name] ? `${emojis[name]} ` : '';
 };
 
-export const generateMainEmbed = async (client, interaction, ign) => {
+export const generateMainEmbed = async (
+  client,
+  interaction,
+  uuid,
+) => {
   const emojis = (await client.db.get('emojis')) || {};
-
-  const uuid = await getUUID(ign);
   const rank = await getRank(client.hyApiKey, uuid);
 
   const profile = await getProfileData(client.hyApiKey, uuid);
@@ -164,11 +166,10 @@ const baseStatEmbed = (title) => {
 export const generateSkillsEmbed = async (
   client,
   interaction,
-  ign,
+  uuid,
 ) => {
   const emojis = (await client.db.get('emojis')) || {};
 
-  const uuid = await getUUID(ign);
   const profile = await getProfileData(client.hyApiKey, uuid);
   const member = getMember(profile, uuid);
   const skills = getSkills(member, profile);
@@ -195,7 +196,7 @@ export const generateSkillsEmbed = async (
 export const generateDungeonsEmbed = async (
   client,
   interaction,
-  ign,
+  uuid,
 ) => {
   const emojis = (await client.db.get('emojis')) || {};
 
@@ -204,8 +205,6 @@ export const generateDungeonsEmbed = async (
   };
 
   const embed = baseStatEmbed('Dungeons');
-
-  const uuid = await getUUID(ign);
   const profile = await getProfileData(client.hyApiKey, uuid);
   const member = getMember(profile, uuid);
   const data = getDungeons(member);
@@ -217,7 +216,9 @@ export const generateDungeonsEmbed = async (
     },
   ]);
 
-  for (const [className, classData] of Object.entries(data?.classes ?? {})) {
+  for (const [className, classData] of Object.entries(
+    data?.classes ?? {},
+  )) {
     embed.addFields([
       {
         name: `${showEmoji(className)}${className.charAt(0).toUpperCase() + className.slice(1)}`,
@@ -233,7 +234,7 @@ export const generateDungeonsEmbed = async (
 export const generateKuudraEmbed = async (
   client,
   interaction,
-  ign,
+  uuid,
 ) => {
   const emojis = (await client.db.get('emojis')) || {};
 
@@ -242,8 +243,6 @@ export const generateKuudraEmbed = async (
   };
 
   const embed = baseStatEmbed('Kuudra');
-
-  const uuid = await getUUID(ign);
   const profile = await getProfileData(client.hyApiKey, uuid);
   const member = getMember(profile, uuid);
 
@@ -273,13 +272,11 @@ export const generateKuudraEmbed = async (
 export const generateFarmingEmbed = async (
   client,
   interaction,
-  ign,
+  uuid,
 ) => {
   const emojis = (await client.db.get('emojis')) || {};
 
   const embed = baseStatEmbed('Farming');
-
-  const uuid = await getUUID(ign);
   const profile = await getProfileData(client.hyApiKey, uuid);
   const gardenData = await getGardenData(
     client.hyApiKey,
@@ -319,13 +316,11 @@ export const generateFarmingEmbed = async (
 export const generateNetworthEmbed = async (
   client,
   interaction,
-  ign,
+  uuid,
 ) => {
   const emojis = (await client.db.get('emojis')) || {};
 
   const embed = baseStatEmbed('Networth');
-
-  const uuid = await getUUID(ign);
   const profile = await getProfileData(client.hyApiKey, uuid);
   const museumData = await getMuseumData(
     client.hyApiKey,

@@ -11,7 +11,7 @@ export const createListing = async (
   client,
   interaction,
   category,
-  ign,
+  uuid,
   price,
   embed,
 ) => {
@@ -55,7 +55,7 @@ export const createListing = async (
     messageId: msg.id,
     channelId: channel.id,
     sellerId: interaction.member.id,
-    ign: ign,
+    uuid: uuid,
   });
 
   await client.db.set(`guild_${interaction.guild.id}`, {

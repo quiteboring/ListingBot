@@ -38,14 +38,16 @@ export const getMinionData = (profile) => {
       member.player_data &&
       Array.isArray(member.player_data.crafted_generators)
     ) {
-      uniqueMinionCount += member.player_data.crafted_generators.length;
+      uniqueMinionCount +=
+        member.player_data.crafted_generators.length;
     }
   }
 
-  let threshold = thresholds
-    .slice()
-    .reverse()
-    .find(([count]) => uniqueMinionCount >= count) ?? thresholds[0];
+  let threshold =
+    thresholds
+      .slice()
+      .reverse()
+      .find(([count]) => uniqueMinionCount >= count) ?? thresholds[0];
 
   const slots = threshold[1];
   const currentIndex = thresholds.indexOf(threshold);
@@ -54,10 +56,12 @@ export const getMinionData = (profile) => {
       ? thresholds[currentIndex + 1][0]
       : null;
 
-  const communitySlots = profile?.community_upgrades?.upgrade_states?.filter(
-    (upgrade) => upgrade.upgrade === 'minion_slots' && upgrade.tier > 0,
-  ).length ?? 0;
-  
+  const communitySlots =
+    profile?.community_upgrades?.upgrade_states?.filter(
+      (upgrade) =>
+        upgrade.upgrade === 'minion_slots' && upgrade.tier > 0,
+    ).length ?? 0;
+
   return {
     crafted: slots,
     community: communitySlots,
