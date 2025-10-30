@@ -248,6 +248,17 @@ export default {
       });
     }
 
+    if (user.id == interaction.user.id) {
+      return await interaction.reply({
+        embeds: [
+          errorEmbed(
+            'You cannot create a middleman ticket with yourself as the receiving end.',
+          ),
+        ],
+        flags: MessageFlags.Ephemeral,
+      });
+    }
+
     await interaction.reply({
       embeds: [successEmbed('Created your ticket!')],
       flags: MessageFlags.Ephemeral,
@@ -279,7 +290,8 @@ export default {
       category,
       'middleman',
       embed,
-      `<@${interaction.user.id}> <@${interaction.fields.getTextInputValue('user_id')}>`,
+      `<@${interaction.user.id}> and <@${interaction.fields.getTextInputValue('user_id')}> need a middleman!`,
+      [interaction.user.id, interaction.fields.getTextInputValue('user_id')]
     );
   },
 

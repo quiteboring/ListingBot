@@ -34,9 +34,6 @@ export default {
       sub
         .setName('sell_account')
         .setDescription('Create a sell account panel!'),
-    )
-    .addSubcommand((sub) =>
-      sub.setName('edit').setDescription('Edit panels!'),
     ),
 
   /**

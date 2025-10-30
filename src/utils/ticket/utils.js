@@ -15,6 +15,7 @@ export const createTicket = async (
   name,
   embed,
   content = `<@${interaction.user.id}>`,
+  members = [interaction.user.id]
 ) => {
   const setup =
     (await client.db.get(`guild_${interaction.guild.id}`)) || {};
@@ -41,13 +42,13 @@ export const createTicket = async (
           PermissionFlagsBits.SendMessages,
         ],
       })),
-      {
-        id: interaction.user.id,
+      ...members.map((userId) => ({
+        id: userId,
         allow: [
           PermissionFlagsBits.ViewChannel,
           PermissionFlagsBits.SendMessages,
         ],
-      },
+      })),
     ],
   });
 
@@ -71,7 +72,7 @@ export const createTicket = async (
   });
 
   tickets.push({
-    users: interaction.user.id,
+    users: [interaction.user.id],
     status: 'open',
     channelId: channel.id,
     messageId: msg.id,
