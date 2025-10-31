@@ -67,7 +67,7 @@ export default {
         await this.createMfaPanel(client, interaction);
         break;
       case 'sell_account':
-        await this.createSellAccountPanel(client, interaction);
+        await this.createSellPanel(client, interaction);
         break;
       default:
         return await interaction.reply({
